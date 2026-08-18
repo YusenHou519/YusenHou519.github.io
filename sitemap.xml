@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-  xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  <url>
-    <loc>/</loc>
-  </url><url>
-    <loc>/page1/</loc>
-  </url><url>
-    <loc>/categories/</loc>
-  </url><url>
-    <loc>/tags/</loc>
-  </url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://yusenhou519.github.io/</loc></url>
+  <url><loc>https://yusenhou519.github.io/Publications/</loc></url>
+  <url><loc>https://yusenhou519.github.io/Experience/</loc></url>
+  <url><loc>https://yusenhou519.github.io/News/</loc></url>
+  <url><loc>https://yusenhou519.github.io/categories/</loc></url>
+  <url><loc>https://yusenhou519.github.io/tags/</loc></url>
 </urlset>
