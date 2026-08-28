@@ -102,19 +102,19 @@ Houcheng Su, Weicai Long, Junning Feng, <strong>Yusen Hou</strong>, Yanlin Zhang
 
 Zirui Wang, <strong>Yusen Hou</strong>, Shaofeng Liang, Bowen Tian, Yanlin Zhang, Wenshuo Chen, Yutao Yue
 
-<em>Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing (EMNLP), 2026.</em>
+<em>Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing (EMNLP Main), 2026.</em>
 
 <a href="paper/ABLE-EMNLP-2026.pdf">Paper</a> · <a href="https://2026.emnlp.org/">Conference</a>
 </div></div>
 
-<div class='paper-box'><div class='paper-box-image'><div><div class="badge">ACL 2026</div><img src='images/genomeqa.png' alt="GenomeQA" width="100%"></div></div>
+<div class='paper-box'><div class='paper-box-image'><div><div class="badge">ACL 2026 Main</div><img src='images/genomeqa.png' alt="GenomeQA" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
 
 [GenomeQA: Benchmarking General Large Language Models for Genome Sequence Understanding](https://aclanthology.org/2026.acl-long.1655/)
 
 Weicai Long*, <strong>Yusen Hou</strong>*, Junning Feng, Houcheng Su, Shuo Yang, Donglin Xie, Yanlin Zhang
 
-<em>Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (ACL), 2026.</em>
+<em>Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (ACL Main), 2026.</em>
 
 <a href="https://aclanthology.org/2026.acl-long.1655/">Paper</a> · <a href="paper/GenomeQA.pdf">PDF</a> · <a href="https://github.com/ai4nucleome/GenomeQA">Code</a>
 </div></div>
@@ -140,7 +140,7 @@ Weicai Long*, <strong>Yusen Hou</strong>*, Junning Feng, Houcheng Su, Shuo Yang,
 
 Houcheng Su, Junning Feng, Yawen Lu, Yucheng Xu, Jinming Yang, Haojie Lu, Jixin Yang, Xu Yang, Sirui Xie, Weicai Long, Cheng-Rui Wang, <strong>Yusen Hou</strong>, Tingyu Zhu, Yanlin Zhang
 
-<em>Patterns, 2026.</em> <strong>Cover Article</strong>
+<em>Patterns (Cell Press), 2026.</em> <span style="color:red"><strong>Cover Article 🔥🔥🔥</strong></span>
 
 <a href="https://www.cell.com/patterns/fulltext/S2666-3899(26)00120-0">Paper</a> · <a href="paper/BioMaster.pdf">PDF</a> · <a href="https://ai4nucleome.github.io/BioMaster/">Web Page</a> · <a href="https://github.com/ai4nucleome/BioMaster">Code</a>
 </div></div>
