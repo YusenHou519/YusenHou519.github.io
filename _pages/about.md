@@ -19,13 +19,9 @@ redirect_from:
 
 # About Me
 
-I am a PhD student in the Data Science and Analytics Thrust at [the Hong Kong University of Science and Technology (Guangzhou)](https://www.hkust-gz.edu.cn/), advised by [Prof. Yanlin Zhang](https://facultyprofiles.hkust-gz.edu.cn/faculty-personal-page/ZHANG-Yanlin/yanlinzhang) and co-supervised by [Prof. Jiguang Wang](https://facultyprofiles.hkust.edu.hk/profiles.php?profile=jiguang-wang-jgwang).
+My name is Yusen Hou (侯 宇森). I am a PhD student in the Data Science and Analytics Thrust at [the Hong Kong University of Science and Technology (Guangzhou)](https://www.hkust-gz.edu.cn/), advised by [Prof. Yanlin Zhang](https://facultyprofiles.hkust-gz.edu.cn/faculty-personal-page/ZHANG-Yanlin/yanlinzhang) and co-supervised by [Prof. Jiguang Wang](https://facultyprofiles.hkust.edu.hk/profiles.php?profile=jiguang-wang-jgwang) at HKUST.
 
 My interests focus on **LLM and AI agent systems for biomedical science** and **computational biology**.
-
-- PhD Student, Data Science and Analytics, HKUST(GZ)
-- MPhil, Data Science and Analytics, HKUST(GZ)
-- Bachelor of Science, Chemistry, Lanzhou University
 
 Contact: [yhou925@connect.hkust-gz.edu.cn](mailto:yhou925@connect.hkust-gz.edu.cn)
 
@@ -52,13 +48,13 @@ Contact: [yhou925@connect.hkust-gz.edu.cn](mailto:yhou925@connect.hkust-gz.edu.c
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">iscbAI 2026 Oral</div><img src='images/glmap.png' alt="GLMap" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
 
-[Profiling genomic language models as individuals in a population](https://github.com/ai4nucleome/GLMap/blob/main/paper/GLMap-iscbAI-2026.pdf)
+[Profiling genomic language models as individuals in a population](paper/GLMap-iscbAI-2026.pdf)
 
 <strong>Yusen Hou</strong>, Weicai Long, Houcheng Su, Junning Feng, Yanlin Zhang
 
 <em>iscbAI, 2026.</em> <a href="https://www.iscb-cn.org.cn/web/65/list.html"><strong>Oral Presentation</strong></a>
 
-<a href="https://github.com/ai4nucleome/GLMap/blob/main/paper/GLMap-iscbAI-2026.pdf">Paper</a> · <a href="https://ai4nucleome.github.io/GLMap/">Web Page</a> · <a href="https://github.com/ai4nucleome/GLMap">Code</a>
+<a href="paper/GLMap-iscbAI-2026.pdf">Paper</a> · <a href="https://ai4nucleome.github.io/GLMap/">Web Page</a> · <a href="https://github.com/ai4nucleome/GLMap">Code</a>
 </div></div>
 
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">bioRxiv</div><img src='images/contextTAD.png' alt="ContextTAD" width="100%"></div></div>
@@ -70,7 +66,7 @@ Weicai Long*, <strong>Yusen Hou</strong>*, Yanlin Zhang
 
 <em>bioRxiv, 2026.</em>
 
-<a href="https://www.biorxiv.org/content/10.64898/2026.05.08.723772v1">Paper</a> · <a href="https://github.com/ai4nucleome/ContextTAD">Code</a>
+<a href="https://www.biorxiv.org/content/10.64898/2026.05.08.723772v1">Paper</a> · <a href="paper/contextTAD.pdf">PDF</a> · <a href="https://github.com/ai4nucleome/ContextTAD">Code</a>
 </div></div>
 
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">bioRxiv</div><img src='images/popgenagent.png' alt="PopGenAgent" width="100%"></div></div>
@@ -82,7 +78,7 @@ Houcheng Su, Weicai Long, Junning Feng, <strong>Yusen Hou</strong>, Yanlin Zhang
 
 <em>bioRxiv, 2026.</em>
 
-<a href="https://www.biorxiv.org/content/10.64898/2026.03.02.709209v2">Paper</a> · <a href="https://github.com/ai4nucleome/POPGENAGENT">Code</a>
+<a href="https://www.biorxiv.org/content/10.64898/2026.03.02.709209v2">Paper</a> · <a href="paper/PopGenAgent.pdf">PDF</a> · <a href="https://github.com/ai4nucleome/POPGENAGENT">Code</a>
 </div></div>
 
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">bioRxiv</div><img src='images/polaris-model.png' alt="Polaris" width="100%"></div></div>
@@ -94,7 +90,7 @@ Houcheng Su, Weicai Long, Junning Feng, <strong>Yusen Hou</strong>, Yanlin Zhang
 
 <em>bioRxiv, 2024.</em>
 
-<a href="https://www.biorxiv.org/content/10.1101/2024.12.24.630215v1">Paper</a> · <a href="https://ai4nucleome.github.io/Polaris/">Web Page</a> · <a href="https://github.com/ai4nucleome/Polaris">Code</a>
+<a href="https://www.biorxiv.org/content/10.1101/2024.12.24.630215v1">Paper</a> · <a href="paper/Polaris.pdf">PDF</a> · <a href="https://ai4nucleome.github.io/Polaris/">Web Page</a> · <a href="https://github.com/ai4nucleome/Polaris">Code</a>
 </div></div>
 
 ## Conference
@@ -120,7 +116,7 @@ Weicai Long*, <strong>Yusen Hou</strong>*, Junning Feng, Houcheng Su, Shuo Yang,
 
 <em>Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (ACL), 2026.</em>
 
-<a href="https://aclanthology.org/2026.acl-long.1655/">Paper</a> · <a href="https://github.com/ai4nucleome/GenomeQA">Code</a>
+<a href="https://aclanthology.org/2026.acl-long.1655/">Paper</a> · <a href="paper/GenomeQA.pdf">PDF</a> · <a href="https://github.com/ai4nucleome/GenomeQA">Code</a>
 </div></div>
 
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">ACL 2026 Findings</div><img src='images/phagebench.png' alt="PhageBench" width="100%"></div></div>
@@ -132,7 +128,7 @@ Weicai Long*, <strong>Yusen Hou</strong>*, Junning Feng, Houcheng Su, Shuo Yang,
 
 <em>Findings of the Annual Meeting of the Association for Computational Linguistics (Findings of ACL), 2026.</em>
 
-<a href="https://arxiv.org/abs/2604.05775">Paper</a> · <a href="https://yusenhou519.github.io/Phage-Bench/">Web Page</a> · <a href="https://github.com/YusenHou519/Phage-Bench">Code</a>
+<a href="https://arxiv.org/abs/2604.05775">Paper</a> · <a href="paper/PhageBench.pdf">PDF</a> · <a href="https://yusenhou519.github.io/Phage-Bench/">Web Page</a> · <a href="https://github.com/YusenHou519/Phage-Bench">Code</a>
 </div></div>
 
 ## Journal
@@ -146,7 +142,7 @@ Houcheng Su, Junning Feng, Yawen Lu, Yucheng Xu, Jinming Yang, Haojie Lu, Jixin 
 
 <em>Patterns, 2026.</em> <strong>Cover Article</strong>
 
-<a href="https://www.cell.com/patterns/fulltext/S2666-3899(26)00120-0">Paper</a> · <a href="https://ai4nucleome.github.io/BioMaster/">Web Page</a> · <a href="https://github.com/ai4nucleome/BioMaster">Code</a>
+<a href="https://www.cell.com/patterns/fulltext/S2666-3899(26)00120-0">Paper</a> · <a href="paper/BioMaster.pdf">PDF</a> · <a href="https://ai4nucleome.github.io/BioMaster/">Web Page</a> · <a href="https://github.com/ai4nucleome/BioMaster">Code</a>
 </div></div>
 
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">Brief. Bioinform. 2026</div><img src='images/nyxbind.png' alt="NyxBind" width="100%"></div></div>
@@ -158,7 +154,7 @@ Xu Yang, Qingfa Xiao, Yucheng Xu, Jixin Yang, <strong>Yusen Hou</strong>, Weicai
 
 <em>Briefings in Bioinformatics, 2026.</em>
 
-<a href="https://europepmc.org/article/med/42007520">Paper</a> · <a href="https://github.com/ai4nucleome/NyxBind">Code</a>
+<a href="https://europepmc.org/article/med/42007520">Paper</a> · <a href="paper/NyxBind.pdf">PDF</a> · <a href="https://github.com/ai4nucleome/NyxBind">Code</a>
 </div></div>
 
 <span class='anchor' id='presentations'></span>

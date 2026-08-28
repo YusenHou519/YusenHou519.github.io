@@ -1,5 +1,5 @@
 title                    : "Yusen Hou"
-description              : "Yusen Hou is a PhD student at HKUST(GZ), working on LLM and AI agents for biomedical science and computational biology."
+description              : "PhD student at HKUST(GZ)"
 repository               : "YusenHou519/YusenHou519.github.io"
 google_scholar_stats_use_cdn : true
 
@@ -15,11 +15,11 @@ baidu_site_verification  :  # get baidu_site_verification from https://ziyuan.ba
 author:
   name             : "Yusen Hou"
   avatar           : "images/hys.jpg"
-  bio              : "PhD Student"
+  bio              : "Computing the world, illuminating life."
   location         : "Guangzhou, China"
-  employer         : "Data Science and Analytics, HKUST(GZ)"
+  employer         : "HKUST(GZ)"
   pubmed           :
-  googlescholar    :
+  googlescholar    : "https://scholar.google.com/citations?user=8eogoosAAAAJ"
   email            : "yhou925@connect.hkust-gz.edu.cn"
   researchgate     :  # e.g., "https://www.researchgate.net/profile/yourprofile"
   uri              :
