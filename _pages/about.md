@@ -43,6 +43,8 @@ Contact: [yhou925@connect.hkust-gz.edu.cn](mailto:yhou925@connect.hkust-gz.edu.c
 
 # Publications
 
+<p class="pub-note">* denotes equal contribution.</p>
+
 ## Workshop & Preprint
 
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">iscbAI 2026 Oral</div><img src='images/glmap.png' alt="GLMap" width="100%"></div></div>
@@ -50,7 +52,7 @@ Contact: [yhou925@connect.hkust-gz.edu.cn](mailto:yhou925@connect.hkust-gz.edu.c
 
 [Profiling genomic language models as individuals in a population](paper/GLMap-iscbAI-2026.pdf)
 
-<strong>Yusen Hou</strong>, Weicai Long, Houcheng Su, Junning Feng, Yanlin Zhang
+<strong><u>Yusen Hou</u></strong>, Weicai Long, Houcheng Su, Junning Feng, Yanlin Zhang
 
 <em>iscbAI, 2026.</em> <a href="https://www.iscb-cn.org.cn/web/65/list.html"><strong>Oral Presentation</strong></a>
 
@@ -62,7 +64,7 @@ Contact: [yhou925@connect.hkust-gz.edu.cn](mailto:yhou925@connect.hkust-gz.edu.c
 
 [ContextTAD: Context-aware boundary learning for TAD calling from Hi-C contact maps](https://www.biorxiv.org/content/10.64898/2026.05.08.723772v1)
 
-Weicai Long*, <strong>Yusen Hou</strong>*, Yanlin Zhang
+Weicai Long\*, <strong><u>Yusen Hou</u></strong>\*, Yanlin Zhang
 
 <em>bioRxiv, 2026.</em>
 
@@ -74,7 +76,7 @@ Weicai Long*, <strong>Yusen Hou</strong>*, Yanlin Zhang
 
 [PopGenAgent: An Agent-Mediated Workflow for Population Genetics Analyses](https://www.biorxiv.org/content/10.64898/2026.03.02.709209v2)
 
-Houcheng Su, Weicai Long, Junning Feng, <strong>Yusen Hou</strong>, Yanlin Zhang
+Houcheng Su, Weicai Long, Junning Feng, <strong><u>Yusen Hou</u></strong>, Yanlin Zhang
 
 <em>bioRxiv, 2026.</em>
 
@@ -86,7 +88,7 @@ Houcheng Su, Weicai Long, Junning Feng, <strong>Yusen Hou</strong>, Yanlin Zhang
 
 [Polaris: A Universal Framework for Chromatin Loop Annotation from Bulk and Single-cell Contact Maps](https://www.biorxiv.org/content/10.1101/2024.12.24.630215v1)
 
-<strong>Yusen Hou</strong>, Audrey Baguette, Mathieu Blanchette, Yanlin Zhang
+<strong><u>Yusen Hou</u></strong>, Audrey Baguette, Mathieu Blanchette, Yanlin Zhang
 
 <em>bioRxiv, 2024.</em>
 
@@ -100,7 +102,7 @@ Houcheng Su, Weicai Long, Junning Feng, <strong>Yusen Hou</strong>, Yanlin Zhang
 
 [ABLE: Representing and Mapping LLMs via Attribution-Based Large-model Embedding](paper/ABLE-EMNLP-2026.pdf)
 
-Zirui Wang, <strong>Yusen Hou</strong>, Shaofeng Liang, Bowen Tian, Yanlin Zhang, Wenshuo Chen, Yutao Yue
+Zirui Wang, <strong><u>Yusen Hou</u></strong>, Shaofeng Liang, Bowen Tian, Yanlin Zhang, Wenshuo Chen, Yutao Yue
 
 <em>Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing (EMNLP Main), 2026.</em>
 
@@ -112,7 +114,7 @@ Zirui Wang, <strong>Yusen Hou</strong>, Shaofeng Liang, Bowen Tian, Yanlin Zhang
 
 [GenomeQA: Benchmarking General Large Language Models for Genome Sequence Understanding](https://aclanthology.org/2026.acl-long.1655/)
 
-Weicai Long*, <strong>Yusen Hou</strong>*, Junning Feng, Houcheng Su, Shuo Yang, Donglin Xie, Yanlin Zhang
+Weicai Long\*, <strong><u>Yusen Hou</u></strong>\*, Junning Feng, Houcheng Su, Shuo Yang, Donglin Xie, Yanlin Zhang
 
 <em>Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (ACL Main), 2026.</em>
 
@@ -124,7 +126,7 @@ Weicai Long*, <strong>Yusen Hou</strong>*, Junning Feng, Houcheng Su, Shuo Yang,
 
 [PhageBench: Can LLMs Understand Raw Bacteriophage Genomes?](https://arxiv.org/abs/2604.05775)
 
-<strong>Yusen Hou</strong>*, Weicai Long*, Haitao Hu, Houcheng Su, Junning Feng, Yanlin Zhang
+<strong><u>Yusen Hou</u></strong>\*, Weicai Long\*, Haitao Hu, Houcheng Su, Junning Feng, Yanlin Zhang
 
 <em>Findings of the Annual Meeting of the Association for Computational Linguistics (Findings of ACL), 2026.</em>
 
@@ -138,9 +140,9 @@ Weicai Long*, <strong>Yusen Hou</strong>*, Junning Feng, Houcheng Su, Shuo Yang,
 
 [BioMaster: multi-agent system for automated bioinformatics analysis workflow](https://www.cell.com/patterns/fulltext/S2666-3899(26)00120-0)
 
-Houcheng Su, Junning Feng, Yawen Lu, Yucheng Xu, Jinming Yang, Haojie Lu, Jixin Yang, Xu Yang, Sirui Xie, Weicai Long, Cheng-Rui Wang, <strong>Yusen Hou</strong>, Tingyu Zhu, Yanlin Zhang
+Houcheng Su, Junning Feng, Yawen Lu, Yucheng Xu, Jinming Yang, Haojie Lu, Jixin Yang, Xu Yang, Sirui Xie, Weicai Long, Cheng-Rui Wang, <strong><u>Yusen Hou</u></strong>, Tingyu Zhu, Yanlin Zhang
 
-<em>Patterns (Cell Press), 2026.</em> <span style="color:red"><strong>Cover Article 🔥🔥🔥</strong></span>
+<em>Patterns (Cell Press), 2026.</em> <span class="highlight-red"><strong>Cover Article 🔥🔥🔥</strong></span>
 
 <a href="https://www.cell.com/patterns/fulltext/S2666-3899(26)00120-0">Paper</a> · <a href="paper/BioMaster.pdf">PDF</a> · <a href="https://ai4nucleome.github.io/BioMaster/">Web Page</a> · <a href="https://github.com/ai4nucleome/BioMaster">Code</a>
 </div></div>
@@ -150,7 +152,7 @@ Houcheng Su, Junning Feng, Yawen Lu, Yucheng Xu, Jinming Yang, Haojie Lu, Jixin 
 
 [NyxBind: enhancing deep neural representations for transcription factor binding site prediction via contrastive learning](https://europepmc.org/article/med/42007520)
 
-Xu Yang, Qingfa Xiao, Yucheng Xu, Jixin Yang, <strong>Yusen Hou</strong>, Weicai Long, Miaojun Huang, Yanlin Zhang
+Xu Yang, Qingfa Xiao, Yucheng Xu, Jixin Yang, <strong><u>Yusen Hou</u></strong>, Weicai Long, Miaojun Huang, Yanlin Zhang
 
 <em>Briefings in Bioinformatics, 2026.</em>
 

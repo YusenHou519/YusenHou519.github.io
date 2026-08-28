@@ -4,6 +4,22 @@
 <meta name="theme-color" content="#ffffff">
 <link rel="stylesheet" href="assets/css/academicons.css"/>
 
+<script>
+  // Runs before first paint so the stored theme does not flash the wrong colours.
+  (function () {
+    var theme = 'light';
+    try {
+      var stored = localStorage.getItem('theme');
+      if (stored === 'dark' || stored === 'light') {
+        theme = stored;
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        theme = 'dark';
+      }
+    } catch (e) {}
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
 <script type="text/x-mathjax-config"> MathJax.Hub.Config({ TeX: { equationNumbers: { autoNumber: "all" } } }); </script>
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({

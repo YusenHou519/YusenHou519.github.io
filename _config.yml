@@ -1,5 +1,5 @@
 title                    : "Yusen Hou"
-description              : "PhD student at HKUST(GZ)"
+description              : "Computing the world, illuminating life."
 repository               : "YusenHou519/YusenHou519.github.io"
 google_scholar_stats_use_cdn : true
 
@@ -15,7 +15,7 @@ baidu_site_verification  :  # get baidu_site_verification from https://ziyuan.ba
 author:
   name             : "Yusen Hou"
   avatar           : "images/hys.jpg"
-  bio              : "Computing the world, illuminating life."
+  bio              : "PhD student at HKUST(GZ)"
   location         : "Guangzhou, China"
   employer         : "HKUST(GZ)"
   pubmed           :

@@ -1,0 +1,233 @@
+/* ==========================================================================
+   DARK MODE
+   Activated by the data-theme attribute set on <html> before first paint.
+   ========================================================================== */
+
+$dm-bg: #17191f;
+$dm-surface: #1f222a;
+$dm-raised: #252a33;
+$dm-border: #373d47;
+$dm-text: #e4e7eb;
+$dm-heading: #f0f2f5;
+$dm-muted: #adb4bf;
+$dm-link: #8bbce8;
+$dm-link-hover: #bbdaf4;
+$dm-accent: #ff8b80;
+
+.pub-note {
+  margin-top: -0.5em;
+  color: mix(#fff, $gray, 15%);
+  font-size: 0.85em;
+}
+
+.highlight-red {
+  color: #c0392b;
+}
+
+/* Reserve room on the right so the toggle never overlaps the
+   greedy-nav overflow button, which is anchored to the nav's right edge. */
+.masthead__inner-wrap {
+  position: relative;
+  padding-right: 3.25em;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.5em;
+  transform: translateY(-50%);
+  z-index: 30;
+  padding: 0.3em 0.5em;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  background: transparent;
+  color: $text-color;
+  font-size: $type-size-5;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $light-gray;
+  }
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  body {
+    background-color: $dm-bg;
+    color: $dm-text;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .author__name,
+  .page__title,
+  .archive__item-title {
+    color: $dm-heading;
+  }
+
+  a {
+    color: $dm-link;
+
+    &:hover {
+      color: $dm-link-hover;
+    }
+  }
+
+  .author__bio,
+  .page__meta,
+  .pub-note {
+    color: $dm-muted;
+  }
+
+  .highlight-red {
+    color: $dm-accent;
+  }
+
+  /* Masthead and navigation */
+
+  .masthead {
+    background-color: $dm-surface;
+    border-bottom-color: $dm-border;
+  }
+
+  .greedy-nav {
+    background: transparent;
+
+    a {
+      color: $dm-text;
+
+      &:hover {
+        color: $dm-link-hover;
+      }
+    }
+
+    .visible-links a:before {
+      background: $dm-link;
+    }
+
+    .hidden-links {
+      background: $dm-raised;
+      border-color: $dm-border;
+
+      a {
+        color: $dm-text;
+
+        &:hover {
+          color: $dm-heading;
+          background: mix(#fff, $dm-raised, 10%);
+        }
+      }
+
+      &:before {
+        border-bottom-color: $dm-raised;
+      }
+    }
+  }
+
+  .theme-toggle {
+    border-color: $dm-border;
+    color: $dm-text;
+
+    &:hover {
+      border-color: $dm-muted;
+    }
+  }
+
+  /* Sidebar and author profile */
+
+  .sidebar {
+    color: $dm-text;
+  }
+
+  .author__avatar img {
+    border-color: $dm-border;
+  }
+
+  /* Only the collapsed (small screen) dropdown has a panel; on wide screens
+     the theme renders these links inline with no background or border. */
+  .author__urls {
+    background: $dm-raised;
+    border-color: $dm-border;
+
+    @include breakpoint($large) {
+      background: transparent;
+      border: 0;
+    }
+
+    &:before {
+      border-color: $dm-border transparent;
+    }
+
+    &:after {
+      border-color: $dm-raised transparent;
+    }
+  }
+
+  /* Publication cards */
+
+  .paper-box {
+    border-bottom-color: $dm-border;
+  }
+
+  .paper-box-image img {
+    box-shadow: 3px 3px 6px rgba(#000, 0.6);
+  }
+
+  /* Code and tables */
+
+  code,
+  pre,
+  a > code {
+    background: $dm-raised;
+    color: $dm-text;
+  }
+
+  table {
+    color: $dm-text;
+  }
+
+  th,
+  td {
+    border-color: $dm-border;
+  }
+
+  thead {
+    background-color: $dm-raised;
+    border-bottom-color: $dm-border;
+  }
+
+  tr:nth-child(even) {
+    background-color: mix(#fff, $dm-bg, 4%);
+  }
+
+  hr {
+    border-color: $dm-border;
+  }
+
+  blockquote {
+    border-left-color: $dm-border;
+    color: $dm-muted;
+  }
+
+  /* Footer */
+
+  .page__footer {
+    background-color: $dm-surface;
+    border-top-color: $dm-border;
+    color: $dm-muted;
+
+    a {
+      color: $dm-muted;
+
+      &:hover {
+        color: $dm-link-hover;
+      }
+    }
+  }
+}
