@@ -70,3 +70,40 @@ Some examples:
 - AcadHomepage incorporates Font Awesome, which is distributed under the terms of the SIL OFL 1.1 and MIT License.
 - AcadHomepage is influenced by the github repo [mmistakes/minimal-mistakes](https://github.com/mmistakes/minimal-mistakes), which is distributed under the MIT License.
 - AcadHomepage is influenced by the github repo [academicpages/academicpages.github.io](https://github.com/academicpages/academicpages.github.io), which is distributed under the MIT License.
+
+## VCC Learning Hub 子页面
+
+学习站位于 `vcc_learning_hub/`，发布后访问：
+https://yusenhou519.github.io/vcc_learning_hub/
+
+主页导航中的 **VCC Learning Hub** 通往学习站，学习站页脚可返回个人主页。
+此目录为独立静态页面，`index.html` 不添加 Jekyll front matter，保留自己的样式与脚本。
+CSS 和 JavaScript 使用相对路径，随主页现有的 GitHub Pages 构建发布。
+
+后续网页更新请修改本仓库 `vcc_learning_hub/` 中的 `index.html`、`styles.css` 和 `app.js`。
+原始学习站目录与这里的发布副本不会自动同步；Controls 数据审计 notebook 已作为教程下载文件收录，见下文。
+学习进度保存在浏览器 localStorage 中，本地预览的进度不会自动迁移到线上域名。
+
+只预览学习子页面（此命令不会渲染 Jekyll 主页）：
+
+```bash
+python3 -m http.server 8000 --directory .
+```
+
+访问 `http://localhost:8000/vcc_learning_hub/`。完整主页预览仍使用上述 Jekyll 启动方式。
+
+### Controls 数据审计教程
+
+- 静态阅读页：`/vcc_learning_hub/control-data-audit/`，学习站首屏提供入口。
+- Notebook 下载：`vcc_learning_hub/notebooks/01_control_data_audit.ipynb`。
+- 阅读页保留全部说明和代码，提供目录、公式和复制按钮；浏览器不执行 Python。
+- 当前 notebook 无保存的输出，网页不包含分析结果。
+
+更新教程时，先将最新版 notebook 复制到上述下载路径，再在仓库根目录执行：
+
+```bash
+python3 docs/build_control_audit.py
+```
+
+生成脚本使用当前环境已有的 `mistune 0.8.x`，发布网页本身不需要 Python 或额外依赖。
+若 notebook 新增运行输出，脚本会提示先扩展输出渲染支持，防止遗漏结果。

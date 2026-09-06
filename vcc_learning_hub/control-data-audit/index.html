@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="VCC 2026 controls 数据审计实操：pseudobulk、表达覆盖率、联合 PCA 与 ntc_id 结构分析。">
+<title>Controls 数据审计实操 · VCC Learning Hub</title>
+<link rel="stylesheet" href="tutorial.css">
+</head>
+<body id="top">
+<a class="skip-link" href="#content">跳到正文</a>
+<header class="topbar"><a class="brand" href="../">VC <span>VCC 2026 / Learning Hub</span></a><a href="../../">个人主页 ↗</a></header>
+<div class="layout">
+<aside><nav aria-label="章节目录"><p class="eyebrow">本页目录</p><a href="#section-1">1. 分块汇总全量 controls，并为 PCA 抽样</a><a href="#section-2">2. Pseudobulk：先求和，再归一化</a><a href="#section-3">3. 表达覆盖率：每个基因被多少细胞检测到</a><a href="#section-4">4. 联合 PCA：在同一个坐标系中比较单细胞</a><a href="#section-5">5. 同一组 PCA 坐标，分别按 context 和测序深度着色</a><a href="#section-6">6. ntc_id：分组规模与 QC 分布</a><a href="#section-7">7. Context 内重新拟合 PCA，观察 ntc_id</a><a href="#section-8">8. 定量检查：组间差异与最近邻富集</a><a href="#section-9">9. 怎样判断 ntc_id 是否伴随明显结构？</a><a href="#section-10">运行后的观察记录</a></nav></aside>
+<main id="content">
+<div class="intro"><p class="eyebrow">NOTEBOOK 01 / DATA AUDIT</p><h1>读懂 A/B/C controls</h1><p class="lead">从汇总表达与覆盖率，到单细胞 PCA 和 ntc_id 结构。</p>
+<div class="tags"><span>9 节分析</span><span>12 个代码单元</span><span>只读数据探索</span></div>
+<div class="actions"><a class="button" href="../notebooks/01_control_data_audit.ipynb" download>下载 Notebook ↓</a><a href="../#roadmap">返回学习路线图 →</a></div>
+<p class="notice">这是 notebook 的静态阅读版，代码需下载后在 Jupyter 中运行。原文件尚无已保存输出，因此本页不展示计算结果或图表。运行前请将 <code>DATA_DIR</code> 改为你自己的 controls 数据目录。</p></div>
+<div class="markdown-cell"><p>在 <code>aivc</code> kernel 中从上到下运行。本 notebook 只读官方 controls，不写出数据，也不执行比赛提交。所有代码单元格均留待手动运行。</p>
+<table>
+<thead><tr>
+<th>分析</th>
+<th>数据点代表什么</th>
+<th>回答的问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pseudobulk</td>
+<td>一个 context 的汇总表达</td>
+<td>A/B/C 的整体表达组成有什么差异？</td>
+</tr>
+<tr>
+<td>表达覆盖率</td>
+<td>基因被检测到的细胞比例</td>
+<td>哪些基因广泛可见，哪些只在少数细胞中出现？</td>
+</tr>
+<tr>
+<td>联合 PCA</td>
+<td>一个细胞</td>
+<td>context 之间及各自内部有哪些主要变化？</td>
+</tr>
+</tbody>
+</table>
+<p>全量 controls 用于汇总和检测率统计；每个 context 随机抽取 1,500 个细胞用于 PCA。这里的图用于探索，不是差异表达显著性检验。</p>
+<p>新增第 6–9 节分析 ntc_id。请从头运行，使全量 QC 和 PCA 样本同时携带 ntc_id。</p>
+</div>
+<div class="code-cell"><div class="code-toolbar"><span>Python · 01</span><button type="button" class="copy-code" hidden>复制代码</button></div><pre tabindex="0"><code>from pathlib import Path
+
+import anndata as ad
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy import sparse
+from sklearn.decomposition import PCA
+from IPython.display import display
+
+# 绝对路径使 notebook 不依赖 Jupyter 的启动目录
+DATA_DIR = Path(
+    &quot;/nvme-data3/yusen/worksapce/aivc2026/myvcc/data/val_data&quot;
+)
+CONTEXTS = [&quot;A&quot;, &quot;B&quot;, &quot;C&quot;]
+COLORS = {&quot;A&quot;: &quot;#4477AA&quot;, &quot;B&quot;: &quot;#EE6677&quot;, &quot;C&quot;: &quot;#228833&quot;}
+CHUNK_SIZE = 512
+N_PCA_CELLS = 1500
+SEED = 42
+
+genes = pd.Index(
+    pd.read_csv(DATA_DIR / &quot;gene_names.csv&quot;)[&quot;gene_name&quot;].astype(str)
+)
+assert genes.is_unique
+assert len(genes) == 18533
+for context in CONTEXTS:
+    assert (DATA_DIR / f&quot;context_{context}.h5ad&quot;).is_file()
+
+print(&quot;基因数:&quot;, len(genes))
+</code></pre></div>
+<div class="markdown-cell"><h2 id="section-1">1. 分块汇总全量 controls，并为 PCA 抽样</h2>
+<p>所有文件必须与官方基因列表顺序一致。使用 <code>backed="r"</code>，每次只把一个表达块加载到内存；关闭文件前，将 PCA 样本通过 <code>to_memory()</code> 读入内存。</p>
+<p>本节累计两种全量统计：</p>
+<ul>
+<li>每个基因的 raw counts 总和，用于 pseudobulk。</li>
+<li>每个基因 count &gt; 0 的细胞数，除以总细胞数得到检测率。</li>
+</ul>
+<p><code>sum_duplicates()</code> 与 <code>eliminate_zeros()</code> 只作用于读取的内存副本。PCA 使用固定种子、不放回抽样，并记录 raw library size 和 detected genes 便于检查技术影响。</p>
+</div>
+<div class="code-cell"><div class="code-toolbar"><span>Python · 02</span><button type="button" class="copy-code" hidden>复制代码</button></div><pre tabindex="0"><code>rng = np.random.default_rng(SEED)
+bulk_by_context = {}
+detection_by_context = {}
+audit_rows = []
+sample_blocks = []
+sample_metadata = []
+full_qc_blocks = []
+
+for context in CONTEXTS:
+    b = ad.read_h5ad(
+        DATA_DIR / f&quot;context_{context}.h5ad&quot;, backed=&quot;r&quot;
+    )
+    try:
+        assert b.var_names.is_unique
+        assert b.var_names.equals(genes), f&quot;{context}: gene alignment 错误&quot;
+        assert set(b.obs[&quot;context&quot;].astype(str)) == {context}
+        assert set(b.obs[&quot;target_gene&quot;].astype(str)) == {&quot;non-targeting&quot;}
+        assert b.n_obs &gt;= N_PCA_CELLS
+        assert &quot;ntc_id&quot; in b.obs.columns
+        assert b.obs_names.is_unique
+        ntc_labels = b.obs[&quot;ntc_id&quot;].astype(&quot;string&quot;).str.strip()
+        ntc_labels = ntc_labels.mask(ntc_labels.eq(&quot;&quot;))
+
+        gene_totals = np.zeros(b.n_vars, dtype=np.float64)
+        detected_cells = np.zeros(b.n_vars, dtype=np.int64)
+        library_all = np.empty(b.n_obs, dtype=np.float64)
+        detected_all = np.empty(b.n_obs, dtype=np.int64)
+
+        for start in range(0, b.n_obs, CHUNK_SIZE):
+            end = min(start + CHUNK_SIZE, b.n_obs)
+            block = sparse.csr_matrix(b.X[start:end, :], copy=True)
+            assert np.isfinite(block.data).all()
+            assert np.all(block.data &gt;= 0)
+            assert np.all(block.data == np.floor(block.data))
+            block.sum_duplicates()
+            block.eliminate_zeros()
+
+            gene_totals += np.asarray(
+                block.sum(axis=0, dtype=np.float64)
+            ).ravel()
+            detected_cells += np.asarray(
+                (block &gt; 0).sum(axis=0)
+            ).ravel().astype(np.int64)
+            library_all[start:end] = np.asarray(
+                block.sum(axis=1, dtype=np.float64)
+            ).ravel()
+            detected_all[start:end] = np.diff(block.indptr)
+
+        bulk_by_context[context] = gene_totals
+        detection_by_context[context] = detected_cells / b.n_obs
+        audit_rows.append({
+            &quot;context&quot;: context,
+            &quot;n_cells&quot;: b.n_obs,
+            &quot;n_genes&quot;: b.n_vars,
+            &quot;library_median&quot;: np.median(library_all),
+            &quot;library_p01&quot;: np.quantile(library_all, 0.01),
+            &quot;detected_genes_median&quot;: np.median(detected_all),
+            &quot;zero_count_cells&quot;: int(np.count_nonzero(library_all == 0)),
+        })
+
+        full_qc_blocks.append(pd.DataFrame({
+            &quot;context&quot;: context,
+            &quot;cell_id&quot;: b.obs_names.to_numpy(),
+            &quot;ntc_id&quot;: ntc_labels.to_numpy(),
+            &quot;library_size&quot;: library_all,
+            &quot;detected_genes&quot;: detected_all,
+        }))
+
+        rows = np.sort(
+            rng.choice(b.n_obs, size=N_PCA_CELLS, replace=False)
+        )
+        sampled = b[rows, :].to_memory()
+        X = sampled.X.tocsr().astype(np.float32)
+        X.sum_duplicates()
+        X.eliminate_zeros()
+
+        library = np.asarray(
+            X.sum(axis=1, dtype=np.float64)
+        ).ravel()
+        assert np.all(library &gt; 0), &quot;PCA 样本出现零 counts 细胞，需先检查&quot;
+
+        sample_blocks.append(X)
+        sample_metadata.append(pd.DataFrame({
+            &quot;context&quot;: context,
+            &quot;cell_id&quot;: sampled.obs_names.to_numpy(),
+            &quot;ntc_id&quot;: ntc_labels.iloc[rows].to_numpy(),
+            &quot;library_size&quot;: library,
+            &quot;detected_genes&quot;: np.diff(X.indptr),
+        }))
+        print(f&quot;{context}: 全量统计完成；PCA 样本 {X.shape}&quot;)
+        del sampled, X, block
+    finally:
+        b.file.close()
+
+bulk_counts = pd.DataFrame(bulk_by_context, index=genes)
+coverage = pd.DataFrame(detection_by_context, index=genes)
+audit = pd.DataFrame(audit_rows).set_index(&quot;context&quot;)
+sample_counts = sparse.vstack(sample_blocks, format=&quot;csr&quot;)
+meta = pd.concat(sample_metadata, ignore_index=True)
+full_qc = pd.concat(full_qc_blocks, ignore_index=True)
+del sample_blocks, sample_metadata, full_qc_blocks
+
+display(audit)
+print(&quot;Pseudobulk:&quot;, bulk_counts.shape)
+print(&quot;Coverage:&quot;, coverage.shape)
+print(&quot;PCA raw counts:&quot;, sample_counts.shape)
+</code></pre></div>
+<div class="markdown-cell"><h2 id="section-2">2. Pseudobulk：先求和，再归一化</h2>
+<p>对 context <code>c</code>、基因 <code>g</code>：</p>
+<div class="equation" aria-label="Pseudobulk 与 CPM 公式">B<sub>cg</sub> = ∑<sub>i ∈ c</sub> X<sub>ig</sub><br>CPM<sub>cg</sub> = B<sub>cg</sub> / (∑<sub>h</sub> B<sub>ch</sub>) × 10<sup>6</sup></div>
+<p>这里使用 <code>log2(CPM + 1)</code> 展示汇总表达；它与 PCA 输入使用的自然对数 <code>log1p(CP10K)</code> 不同。</p>
+<p>先汇总再归一化相当于按 library size 加权的细胞表达比例平均；先逐细胞归一化再平均则让每个非空细胞权重相同。二者不可混称。</p>
+<p>每个 context 在这里仅有一个汇总向量，不能把它当成具有多个独立生物学重复的差异表达实验。</p>
+</div>
+<div class="code-cell"><div class="code-toolbar"><span>Python · 03</span><button type="button" class="copy-code" hidden>复制代码</button></div><pre tabindex="0"><code>assert (bulk_counts.sum(axis=0) &gt; 0).all()
+bulk_cpm = bulk_counts.div(bulk_counts.sum(axis=0), axis=1) * 1_000_000
+bulk_log = np.log2(bulk_cpm + 1)
+
+display(bulk_cpm.head())
+print(&quot;跨基因的 log-pseudobulk Pearson 相关性&quot;)
+display(bulk_log.corr())
+
+pairs = [(&quot;A&quot;, &quot;B&quot;), (&quot;A&quot;, &quot;C&quot;), (&quot;B&quot;, &quot;C&quot;)]
+fig, axes = plt.subplots(1, 3, figsize=(13, 4))
+
+for ax, (left, right) in zip(axes, pairs):
+    x, y = bulk_log[left], bulk_log[right]
+    ax.scatter(x, y, s=3, alpha=0.2, rasterized=True)
+    upper = max(x.max(), y.max())
+    ax.plot([0, upper], [0, upper], &quot;--&quot;, color=&quot;gray&quot;, linewidth=1)
+    ax.set(
+        xlabel=f&quot;{left}: log2(CPM + 1)&quot;,
+        ylabel=f&quot;{right}: log2(CPM + 1)&quot;,
+        title=f&quot;{left} vs {right}; r={x.corr(y):.3f}&quot;,
+    )
+plt.tight_layout()
+plt.show()
+</code></pre></div>
+<div class="markdown-cell"><p>每个散点是一个基因。靠近对角线表示两个 context 的相对丰度接近，偏离较远表示差异较大。相关性高不等于所有重要基因都相似，全零基因及广泛表达基因也会影响相关性。</p>
+<p>下面按三个 context 的 log 表达极差筛选 20 个基因，并要求至少一个 context 达到 10 CPM。阈值和排序仅用于探索，不是显著性检验，也不是比赛规则。</p>
+</div>
+<div class="code-cell"><div class="code-toolbar"><span>Python · 04</span><button type="button" class="copy-code" hidden>复制代码</button></div><pre tabindex="0"><code>eligible = bulk_cpm.max(axis=1) &gt;= 10
+expression_range = bulk_log.max(axis=1) - bulk_log.min(axis=1)
+top_genes = expression_range[eligible].nlargest(20).index
+
+display(bulk_cpm.loc[top_genes].round(1))
+
+heat = bulk_log.loc[top_genes]
+heat = heat.sub(heat.mean(axis=1), axis=0)
+limit = max(float(np.abs(heat.to_numpy()).max()), 1e-6)
+
+fig, ax = plt.subplots(figsize=(5, 7))
+im = ax.imshow(
+    heat.to_numpy(), aspect=&quot;auto&quot;, cmap=&quot;RdBu_r&quot;,
+    vmin=-limit, vmax=limit,
+)
+ax.set_xticks(range(3), CONTEXTS)
+ax.set_yticks(range(len(top_genes)), top_genes)
+ax.set_title(&quot;Context differences in pseudobulk&quot;)
+fig.colorbar(im, ax=ax, label=&quot;Centered log2(CPM + 1)&quot;)
+plt.tight_layout()
+plt.show()
+</code></pre></div>
+<div class="markdown-cell"><h2 id="section-3">3. 表达覆盖率：每个基因被多少细胞检测到</h2>
+<div class="equation" aria-label="检测率公式">D<sub>cg</sub> = #{i ∈ c : X<sub>ig</sub> &gt; 0} / N<sub>c</sub></div>
+<p>例如检测率为 0.6，表示该 context 的 60% 细胞检测到这个基因。它与“每个细胞检测到多少个基因”是两个不同方向的统计。</p>
+<p>“至少一个细胞检测到”对细胞数很敏感；1%、10%、50% 是便于比较的探索阈值。检测不到不等于真实不表达，library size 较低也可能降低检测率。</p>
+</div>
+<div class="code-cell"><div class="code-toolbar"><span>Python · 05</span><button type="button" class="copy-code" hidden>复制代码</button></div><pre tabindex="0"><code>coverage_summary = pd.DataFrame({
+    &quot;Detected in &gt;=1 cell&quot;: (coverage &gt; 0).sum(),
+    &quot;Detected in &gt;=1% cells&quot;: (coverage &gt;= 0.01).sum(),
+    &quot;Detected in &gt;=10% cells&quot;: (coverage &gt;= 0.10).sum(),
+    &quot;Detected in &gt;=50% cells&quot;: (coverage &gt;= 0.50).sum(),
+})
+
+display(coverage_summary)
+ax = coverage_summary.plot.bar(figsize=(9, 4))
+ax.set_ylabel(&quot;Number of genes&quot;)
+ax.set_xlabel(&quot;Context&quot;)
+ax.tick_params(axis=&quot;x&quot;, rotation=0)
+plt.tight_layout()
+plt.show()
+
+comparison = pd.concat({
+    &quot;pseudobulk_CPM&quot;: bulk_cpm.loc[top_genes],
+    &quot;detection_fraction&quot;: coverage.loc[top_genes],
+}, axis=1)
+display(comparison.round(3))
+</code></pre></div>
+<div class="markdown-cell"><p>解读时将检测率和平均丰度一起看：</p>
+<ul>
+<li>丰度高、检测率高：广泛且较强地表达。</li>
+<li>丰度高、检测率低：可能主要由少数高表达细胞贡献。</li>
+<li>丰度低、检测率低：可能低表达，也可能受测量深度限制。</li>
+</ul>
+<p>此前审计发现 B 的低 library-size 尾部更长；如果 B 的覆盖率偏低，需同时考虑深度因素。</p>
+</div>
+<div class="markdown-cell"><h2 id="section-4">4. 联合 PCA：在同一个坐标系中比较单细胞</h2>
+<p>流程：三个 context 平衡抽样 → 按全部基因计算 CP10K → 自然对数 log1p → 联合选择高方差基因 → 拟合一次 PCA。</p>
+<p>先归一化，再选基因，避免用选中基因的 counts 总和替代原始 library size。这里按 log 表达方差挑选最多 3,000 个基因，是直观探索方案，不是正式的均值校正 HVG 算法。</p>
+<p>PCA 自动逐基因中心化，但不自动缩放到单位方差。我们保留这一设定。仅将 4,500 × 最多 3,000 的抽样特征矩阵转为 dense（float32 约 52 MiB，拟合时还会产生额外内存）。</p>
+<p>不要分别拟合 A/B/C 的 PCA 再叠图：独立拟合的主成分不是同一坐标系。</p>
+</div>
+<div class="code-cell"><div class="code-toolbar"><span>Python · 06</span><button type="button" class="copy-code" hidden>复制代码</button></div><pre tabindex="0"><code>library = meta[&quot;library_size&quot;].to_numpy()
+log_x = sample_counts.multiply(
+    (10_000 / library)[:, None]
+).tocsr().astype(np.float32)
+log_x.data = np.log1p(log_x.data)
+
+mean = np.asarray(log_x.mean(axis=0, dtype=np.float64)).ravel()
+mean_square = np.asarray(
+    log_x.power(2).mean(axis=0, dtype=np.float64)
+).ravel()
+variance = np.maximum(mean_square - mean**2, 0)
+
+eligible = (
+    (coverage.max(axis=1).to_numpy() &gt;= 0.01)
+    &amp; (variance &gt; 0)
+)
+candidate_indices = np.flatnonzero(eligible)
+n_features = min(3000, len(candidate_indices))
+assert n_features &gt;= 2, &quot;可用基因不足，请检查输入数据&quot;
+selected = candidate_indices[
+    np.argsort(variance[candidate_indices])[-n_features:]
+]
+
+features = log_x[:, selected].toarray()
+n_components = min(20, features.shape[0] - 1, features.shape[1])
+pca = PCA(
+    n_components=n_components,
+    svd_solver=&quot;randomized&quot;,
+    random_state=SEED,
+)
+coordinates = pca.fit_transform(features)
+meta[&quot;PC1&quot;] = coordinates[:, 0]
+meta[&quot;PC2&quot;] = coordinates[:, 1]
+
+print(&quot;PCA features:&quot;, features.shape)
+print(&quot;输入数组 MiB:&quot;, features.nbytes / 1024**2)
+print(&quot;前5个PC解释方差比例:&quot;, pca.explained_variance_ratio_[:5])
+</code></pre></div>
+<div class="markdown-cell"><h2 id="section-5">5. 同一组 PCA 坐标，分别按 context 和测序深度着色</h2>
+<p>三张图的坐标完全相同，只有颜色不同。若一个区域同时对应某个 context 和低 library size，不能仅凭聚类形状断定它是生物学亚群。</p>
+<p>随机打乱绘图顺序，减少最后绘制的 context 遮挡其他点。PC1/PC2 的分离或重叠只描述当前预处理和特征选择下的投影；二维重叠不意味着高维表达完全一致。</p>
+</div>
+<div class="code-cell"><div class="code-toolbar"><span>Python · 07</span><button type="button" class="copy-code" hidden>复制代码</button></div><pre tabindex="0"><code>fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+order = np.random.default_rng(SEED).permutation(len(meta))
+points = meta.iloc[order]
+
+axes[0].scatter(
+    points[&quot;PC1&quot;], points[&quot;PC2&quot;],
+    c=points[&quot;context&quot;].map(COLORS).tolist(),
+    s=5, alpha=0.5, linewidths=0,
+)
+for context in CONTEXTS:
+    axes[0].scatter([], [], color=COLORS[context], label=context)
+axes[0].legend()
+axes[0].set_title(&quot;Colored by context&quot;)
+
+im = axes[1].scatter(
+    points[&quot;PC1&quot;], points[&quot;PC2&quot;],
+    c=np.log10(points[&quot;library_size&quot;]),
+    cmap=&quot;viridis&quot;, s=5, linewidths=0,
+)
+fig.colorbar(im, ax=axes[1], label=&quot;log10(raw library size)&quot;)
+axes[1].set_title(&quot;Colored by library size&quot;)
+
+im = axes[2].scatter(
+    points[&quot;PC1&quot;], points[&quot;PC2&quot;],
+    c=points[&quot;detected_genes&quot;],
+    cmap=&quot;viridis&quot;, s=5, linewidths=0,
+)
+fig.colorbar(im, ax=axes[2], label=&quot;Detected genes&quot;)
+axes[2].set_title(&quot;Colored by detected genes&quot;)
+
+for ax in axes:
+    ax.set_xlabel(f&quot;PC1 ({pca.explained_variance_ratio_[0]:.1%})&quot;)
+    ax.set_ylabel(f&quot;PC2 ({pca.explained_variance_ratio_[1]:.1%})&quot;)
+plt.tight_layout()
+plt.show()
+</code></pre></div>
+<div class="markdown-cell"><p>在每个 context 内部计算 PC 与 QC 指标的 Spearman 相关性，避免全局相关性混入 context 间的差异。相关性只能提示关联，不能证明技术因素是唯一原因。</p>
+</div>
+<div class="code-cell"><div class="code-toolbar"><span>Python · 08</span><button type="button" class="copy-code" hidden>复制代码</button></div><pre tabindex="0"><code>qc_correlations = []
+for context in CONTEXTS:
+    part = meta[meta[&quot;context&quot;] == context]
+    for pc in [&quot;PC1&quot;, &quot;PC2&quot;]:
+        qc_correlations.append({
+            &quot;context&quot;: context,
+            &quot;PC&quot;: pc,
+            &quot;rho_library&quot;: part[pc].corr(
+                part[&quot;library_size&quot;], method=&quot;spearman&quot;
+            ),
+            &quot;rho_detected_genes&quot;: part[pc].corr(
+                part[&quot;detected_genes&quot;], method=&quot;spearman&quot;
+            ),
+        })
+
+display(pd.DataFrame(qc_correlations).round(3))
+</code></pre></div>
+<div class="markdown-cell"><h2 id="section-6">6. ntc_id：分组规模与 QC 分布</h2>
+<p>这里将 <code>ntc_id</code> 视为数据提供的 non-targeting control 分组标签。仅凭字段名不能确定它代表 guide、实验批次还是其他设计；也不能假设 A/B/C 中相同的字符串是独立重复或同一个实验单位。统计始终在各自 context 内进行。</p>
+<p>先用全部细胞检查每个 ID 的数量、缺失值、library size 和 detected genes。缺失/空白 ID 会被报告，并从后面的分组关联分析中排除，不会伪装成有效 ID。PCA 样本是随机抽样，各 ID 的抽样数量并不固定。</p>
+<p>注意：上游第 1 节已增加 full_qc 和 meta["ntc_id"]，请从头重跑；旧 kernel 中的 meta 不包含这一列。</p>
+</div>
+<div class="code-cell"><div class="code-toolbar"><span>Python · 09</span><button type="button" class="copy-code" hidden>复制代码</button></div><pre tabindex="0"><code>assert &quot;ntc_id&quot; in full_qc.columns and &quot;ntc_id&quot; in meta.columns
+
+display(full_qc.groupby(&quot;context&quot;, observed=True).agg(
+    n_cells=(&quot;cell_id&quot;, &quot;size&quot;),
+    n_ntc_ids=(&quot;ntc_id&quot;, &quot;nunique&quot;),
+    missing_ntc=(&quot;ntc_id&quot;, lambda x: x.isna().sum()),
+))
+
+ntc_qc = (
+    full_qc.dropna(subset=[&quot;ntc_id&quot;])
+    .groupby([&quot;context&quot;, &quot;ntc_id&quot;], observed=True)
+    .agg(
+        n_cells=(&quot;cell_id&quot;, &quot;size&quot;),
+        library_median=(&quot;library_size&quot;, &quot;median&quot;),
+        library_p10=(&quot;library_size&quot;, lambda x: x.quantile(0.1)),
+        library_p90=(&quot;library_size&quot;, lambda x: x.quantile(0.9)),
+        detected_median=(&quot;detected_genes&quot;, &quot;median&quot;),
+    )
+)
+sample_n = (
+    meta.dropna(subset=[&quot;ntc_id&quot;])
+    .groupby([&quot;context&quot;, &quot;ntc_id&quot;], observed=True).size()
+)
+ntc_qc[&quot;n_in_pca_sample&quot;] = (
+    sample_n.reindex(ntc_qc.index, fill_value=0).astype(int)
+)
+display(ntc_qc)
+
+fig, axes = plt.subplots(3, 3, figsize=(16, 11))
+for row, context in enumerate(CONTEXTS):
+    if context not in ntc_qc.index.get_level_values(&quot;context&quot;):
+        for ax in axes[row]:
+            ax.set_visible(False)
+        continue
+    tab = ntc_qc.xs(context).sort_values(&quot;library_median&quot;)
+    positions = np.arange(len(tab))
+    axes[row, 0].bar(positions, tab[&quot;n_cells&quot;], color=COLORS[context])
+    axes[row, 1].vlines(
+        positions, tab[&quot;library_p10&quot;], tab[&quot;library_p90&quot;],
+        color=COLORS[context], alpha=0.35,
+    )
+    axes[row, 1].scatter(
+        positions, tab[&quot;library_median&quot;], s=12, color=COLORS[context]
+    )
+    axes[row, 2].scatter(
+        positions, tab[&quot;detected_median&quot;], s=12, color=COLORS[context]
+    )
+    for ax, title in zip(axes[row], [
+        &quot;Cell count&quot;, &quot;Library size: median + P10/P90&quot;, &quot;Detected genes: median&quot;
+    ]):
+        ax.set_title(f&quot;{context}: {title}&quot;)
+        ax.set_xticks(positions, tab.index.astype(str), rotation=90, fontsize=6)
+        ax.set_xlabel(&quot;ntc_id (ordered by median library size)&quot;)
+plt.tight_layout()
+plt.show()
+</code></pre></div>
+<div class="markdown-cell"><h2 id="section-7">7. Context 内重新拟合 PCA，观察 ntc_id</h2>
+<p>联合 PCA 主要关注 A/B/C 的大尺度差异，可能掩盖 context 内部的结构。本节对每个 context 的抽样细胞单独选择高方差基因并拟合 PCA。</p>
+<p>每个 context 使用自己的坐标系，因此只在同一个 context 内比较图，不能将不同 context 的 PC1/PC2 数值直接比较。选择基因和拟合 PCA 均不使用 ntc_id 标签，避免先按标签选择特征再检验标签的循环分析。</p>
+<p>左图用离散色展示所有已观察到的 ID，并标注各组的中心；组数较多时颜色难以区分，请结合后面的单 ID 高亮图。右图以相同坐标显示 library size。前 10 个 PC 用于后续定量检查，二维图不承担全部判断。</p>
+</div>
+<div class="code-cell"><div class="code-toolbar"><span>Python · 10</span><button type="button" class="copy-code" hidden>复制代码</button></div><pre tabindex="0"><code>local_ntc = {}
+fig, axes = plt.subplots(len(CONTEXTS), 2, figsize=(13, 13))
+
+for row, context in enumerate(CONTEXTS):
+    positions = np.flatnonzero(
+        meta[&quot;context&quot;].eq(context).to_numpy()
+        &amp; meta[&quot;ntc_id&quot;].notna().to_numpy()
+    )
+    if len(positions) &lt; 3:
+        print(context, &quot;有效 ntc_id 细胞不足，跳过&quot;)
+        for ax in axes[row]:
+            ax.set_visible(False)
+        continue
+
+    part = meta.iloc[positions].reset_index(drop=True).copy()
+    lx = log_x[positions, :]
+    mu = np.asarray(lx.mean(axis=0, dtype=np.float64)).ravel()
+    var = np.maximum(
+        np.asarray(lx.power(2).mean(axis=0, dtype=np.float64)).ravel()
+        - mu**2, 0,
+    )
+    eligible_idx = np.flatnonzero(
+        (coverage[context].to_numpy() &gt;= 0.01) &amp; (var &gt; 0)
+    )
+    chosen = eligible_idx[np.argsort(var[eligible_idx])[-3000:]]
+    if len(chosen) &lt; 2:
+        print(context, &quot;有效特征不足，跳过&quot;)
+        for ax in axes[row]:
+            ax.set_visible(False)
+        continue
+
+    local_pca = PCA(
+        n_components=min(10, len(positions) - 1, len(chosen)),
+        svd_solver=&quot;randomized&quot;, random_state=SEED,
+    )
+    z = local_pca.fit_transform(lx[:, chosen].toarray())
+    codes, names = pd.factorize(part[&quot;ntc_id&quot;], sort=True)
+    local_ntc[context] = {
+        &quot;scores&quot;: z, &quot;meta&quot;: part, &quot;codes&quot;: codes, &quot;names&quot;: names,
+        &quot;variance_ratio&quot;: local_pca.explained_variance_ratio_,
+        &quot;genes&quot;: genes[chosen],
+    }
+
+    cmap = plt.get_cmap(&quot;turbo&quot;, max(2, len(names)))
+    for g, name in enumerate(names):
+        mask = codes == g
+        axes[row, 0].scatter(
+            z[mask, 0], z[mask, 1], color=cmap(g),
+            s=6, alpha=0.55, linewidths=0,
+        )
+        center = z[mask, :2].mean(axis=0)
+        axes[row, 0].annotate(
+            str(name), center, fontsize=5, alpha=0.85
+        )
+    axes[row, 0].set_title(f&quot;{context}: ntc_id (labels at centroids)&quot;)
+    im = axes[row, 1].scatter(
+        z[:, 0], z[:, 1], c=np.log10(part[&quot;library_size&quot;]),
+        s=6, cmap=&quot;viridis&quot;, linewidths=0,
+    )
+    fig.colorbar(im, ax=axes[row, 1], label=&quot;log10(raw library size)&quot;)
+    axes[row, 1].set_title(f&quot;{context}: library size&quot;)
+    for ax in axes[row]:
+        ax.set_xlabel(f&quot;Local PC1 ({local_pca.explained_variance_ratio_[0]:.1%})&quot;)
+        ax.set_ylabel(f&quot;Local PC2 ({local_pca.explained_variance_ratio_[1]:.1%})&quot;)
+
+plt.tight_layout()
+plt.show()
+</code></pre></div>
+<div class="code-cell"><div class="code-toolbar"><span>Python · 11</span><button type="button" class="copy-code" hidden>复制代码</button></div><pre tabindex="0"><code># 改成你想检查的 context 和 ntc_id；None 默认选择抽样最多的 ID
+CONTEXT_TO_INSPECT = &quot;A&quot;
+NTC_TO_INSPECT = None
+
+entry = local_ntc[CONTEXT_TO_INSPECT]
+part, z = entry[&quot;meta&quot;], entry[&quot;scores&quot;]
+chosen_id = (
+    str(part[&quot;ntc_id&quot;].value_counts().index[0])
+    if NTC_TO_INSPECT is None else str(NTC_TO_INSPECT)
+)
+mask = part[&quot;ntc_id&quot;].astype(str).eq(chosen_id).to_numpy()
+assert mask.any(), f&quot;{chosen_id} 不在该 context 的 PCA 样本中&quot;
+
+fig, ax = plt.subplots(figsize=(6, 5))
+ax.scatter(z[~mask, 0], z[~mask, 1], s=7, color=&quot;lightgray&quot;, label=&quot;Other IDs&quot;)
+ax.scatter(z[mask, 0], z[mask, 1], s=15, color=&quot;#CC3311&quot;, label=chosen_id)
+ax.set(xlabel=&quot;Local PC1&quot;, ylabel=&quot;Local PC2&quot;,
+       title=f&quot;{CONTEXT_TO_INSPECT}: highlight {chosen_id}&quot;)
+ax.legend()
+plt.tight_layout()
+plt.show()
+</code></pre></div>
+<div class="markdown-cell"><h2 id="section-8">8. 定量检查：组间差异与最近邻富集</h2>
+<p>仅看几十种颜色容易误判。本节使用每个 context 的前最多 10 个局部 PC，计算：</p>
+<ol>
+<li><strong>centroid_eta2</strong>：按 ntc_id 分组的组间平方和 / 总平方和。是这组 PC 空间内的描述性效应量，不是所有基因方差的解释比例，也不意味着因果作用。组数多时随机标签也会得到正值，所以要和置换对照比较。</li>
+<li><strong>same_id_neighbor_fraction</strong>：每个细胞的 k 个近邻中，同 ntc_id 的比例，再对细胞平均。近邻排除自身，默认 k=15。</li>
+</ol>
+<p>固定表达坐标与邻居图，只打乱 ntc_id；每个 context 独立处理。对照有两种：</p>
+<ul>
+<li><strong>within_context</strong>：在该 context 全体细胞间打乱，保留各 ID 总数。</li>
+<li><strong>within_depth_bins</strong>：只在原始 library size 的五分位层内打乱，同时保留各层的 ID 数量组成。用于检查粗略匹配深度后是否仍存在关联，不是完整的混杂校正。</li>
+</ul>
+<p>默认 199 次置换，最小可报告经验 p 值为 1/200=0.005。p 值未校正多重比较，只是探索参考；读 observed、null_mean、excess 与富集倍数，而不是单凭 p 值判定“明显结构”。</p>
+<p>细胞可交换性是这些置换的假设。若存在 donor、plate、实验重复或其他嵌套结构，必须按实际实验设计重新设置置换单位；当前结果不能替代生物学重复层面的检验。</p>
+</div>
+<div class="code-cell"><div class="code-toolbar"><span>Python · 12</span><button type="button" class="copy-code" hidden>复制代码</button></div><pre tabindex="0"><code>from sklearn.neighbors import NearestNeighbors
+
+def ntc_structure_metrics(z, labels, neighbors):
+    &quot;&quot;&quot;固定 PCA 表示和无自身邻居图；返回两种描述性结构指标。&quot;&quot;&quot;
+    z = np.asarray(z, dtype=np.float64)
+    codes, _ = pd.factorize(labels, sort=True)
+    if (codes &lt; 0).any():
+        raise ValueError(&quot;请先排除缺失 ntc_id&quot;)
+    centered = z - z.mean(axis=0, keepdims=True)
+    total_ss = np.square(centered).sum()
+    sizes = np.bincount(codes)
+    group_sums = np.zeros((len(sizes), z.shape[1]), dtype=np.float64)
+    np.add.at(group_sums, codes, centered)
+    between_ss = (np.square(group_sums) / sizes[:, None]).sum()
+    eta2 = between_ss / total_ss if total_ss &gt; 0 else np.nan
+    neighbor_fraction = (codes[neighbors] == codes[:, None]).mean()
+    return np.array([eta2, neighbor_fraction])
+
+N_PERMUTATIONS = 199
+K_NEIGHBORS = 15
+metric_names = [&quot;centroid_eta2&quot;, &quot;same_id_neighbor_fraction&quot;]
+result_rows = []
+
+for context_index, context in enumerate(CONTEXTS):
+    if context not in local_ntc:
+        continue
+    entry = local_ntc[context]
+    z = entry[&quot;scores&quot;]
+    labels = entry[&quot;codes&quot;]
+    if len(np.unique(labels)) &lt; 2:
+        print(context, &quot;只有一个 ntc_id，无法比较 ID 间结构&quot;)
+        continue
+
+    k = min(K_NEIGHBORS, len(z) - 1)
+    nn = NearestNeighbors(n_neighbors=k).fit(z)
+    # X=None：查询训练样本的邻居，sklearn 会排除样本自身
+    neighbors = nn.kneighbors(return_distance=False)
+    assert not np.any(neighbors == np.arange(len(z))[:, None])
+
+    observed = ntc_structure_metrics(z, labels, neighbors)
+    # 相同深度不人为拆散；若存在重复分位点，则减少层数
+    bins = pd.qcut(
+        entry[&quot;meta&quot;][&quot;library_size&quot;], q=5, labels=False, duplicates=&quot;drop&quot;
+    )
+    depth_codes = np.asarray(bins.fillna(0), dtype=int)
+    depth_groups = [np.flatnonzero(depth_codes == b) for b in np.unique(depth_codes)]
+
+    for mode_index, mode in enumerate([&quot;within_context&quot;, &quot;within_depth_bins&quot;]):
+        groups = (
+            [np.arange(len(labels))] if mode == &quot;within_context&quot; else depth_groups
+        )
+        perm_rng = np.random.default_rng(SEED + 100 * context_index + mode_index)
+        null = np.empty((N_PERMUTATIONS, len(metric_names)))
+
+        for repeat in range(N_PERMUTATIONS):
+            shuffled = labels.copy()
+            for group in groups:
+                shuffled[group] = perm_rng.permutation(labels[group])
+            null[repeat] = ntc_structure_metrics(z, shuffled, neighbors)
+
+        for j, name in enumerate(metric_names):
+            reference = float(null[:, j].mean())
+            result_rows.append({
+                &quot;context&quot;: context,
+                &quot;null_model&quot;: mode,
+                &quot;metric&quot;: name,
+                &quot;n_cells&quot;: len(z),
+                &quot;n_ids&quot;: len(np.unique(labels)),
+                &quot;n_shuffle_strata&quot;: len(groups),
+                &quot;observed&quot;: observed[j],
+                &quot;null_mean&quot;: reference,
+                &quot;null_p95&quot;: np.quantile(null[:, j], 0.95),
+                &quot;excess&quot;: observed[j] - reference,
+                &quot;ratio_to_null&quot;: observed[j] / reference if reference &gt; 0 else np.nan,
+                &quot;p_exploratory&quot;: (
+                    1 + np.count_nonzero(null[:, j] &gt;= observed[j])
+                ) / (N_PERMUTATIONS + 1),
+            })
+
+structure_results = pd.DataFrame(result_rows)
+display(structure_results.round(4))
+</code></pre></div>
+<div class="markdown-cell"><h2 id="section-9">9. 怎样判断 ntc_id 是否伴随明显结构？</h2>
+<ul>
+<li><strong>主要是 QC 差异</strong>：各 ID 的 library size / detected genes 有明显差异；局部 PCA 的颜色梯度也跟深度一致。优先排查测序、捕获或分组设计。</li>
+<li><strong>超出粗略深度对照的关联</strong>：同 ID 近邻比例明显高于深度层内置换对照，且组间 PC 差异也高于对照。说明 ntc_id 与表达结构相关，仍不能证明 ntc_id 本身造成变化。</li>
+<li><strong>未见强证据</strong>：二维图混合、效应量接近置换对照。这只表示当前抽样、特征及 PC 空间下没有检出强结构，不等于证明完全无影响。</li>
+</ul>
+<p>“明显”没有适用于所有数据的单一阈值。结合效应量、随机对照、QC、局部图及改变种子后的稳定性一起判断。199 次置换只是初筛，反复调整参数后的 p 值不能当作预先设定的正式检验结果。</p>
+<p>若要进一步验证，可提高 N_PCA_CELLS 或换 SEED 后从头重跑；抽样较少的 ID 在二维图和统计中都不稳定。不要因为看到聚类就自动回归掉 ntc_id，也不要把 46 个 ID 自动当成 46 个独立生物学重复。</p>
+<p>记录：</p>
+<ul>
+<li>全量 ntc_id 数量、是否均衡、是否缺失：</li>
+<li>哪些 ID 的 QC 指标异常：</li>
+<li>context 内 PCA 是否出现同 ID 聚集：</li>
+<li>原始置换对照与深度分层对照是否一致：</li>
+<li>抽样种子改变后是否稳定：</li>
+<li>还需要确认的实验设计信息：</li>
+</ul>
+<p>参考：<a href="https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.NearestNeighbors.html">scikit-learn NearestNeighbors（X=None 时排除自身）</a>。</p>
+</div>
+<div class="markdown-cell"><h2 id="section-10">运行后的观察记录</h2>
+<ol>
+<li>哪两个 context 的 pseudobulk 最相近？其细胞在 PCA 中也更接近吗？</li>
+<li>context 特异的高丰度基因，是广泛表达，还是少数细胞贡献？</li>
+<li>PCA 的主要变化是否伴随 library size 或 detected genes 的变化？</li>
+<li>换一个抽样种子后，主要结构是否稳定？</li>
+</ol>
+<p><strong>记录你的结果：</strong></p>
+<ul>
+<li>Pseudobulk：</li>
+<li>检测率：</li>
+<li>PCA：</li>
+<li>仍需排查的技术因素：</li>
+</ul>
+<p>这些图描述的是未扰动的 basal state，不能单独证明扰动响应相似。A/B/C 是不同 context；当前探索不进行 batch integration，也不能把它们的差异直接当成应当消除的 batch effect。</p>
+<p>参考：</p>
+<ul>
+<li><a href="https://anndata.readthedocs.io/en/stable/generated/anndata.io.read_h5ad.html">AnnData backed 读取</a></li>
+<li><a href="https://scanpy.readthedocs.io/en/stable/generated/scanpy.pp.normalize_total.html">Scanpy 按细胞总量归一化</a></li>
+<li><a href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html">scikit-learn PCA：中心化及参数说明</a></li>
+</ul>
+</div>
+<footer><a href="../">← 返回 Learning Hub</a><a href="#top">返回顶部 ↑</a></footer>
+</main></div>
+<script src="tutorial.js"></script>
+</body></html>

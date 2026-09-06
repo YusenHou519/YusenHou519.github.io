@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="面向基因组模型研究者的 Virtual Cell Challenge 2026 学习与参赛路线图">
+  <title>VCC 2026 学习与参赛路线图</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="返回顶部">
+      <span class="brand-mark">VC</span>
+      <span><strong>VCC 2026</strong><small>Learning Hub</small></span>
+    </a>
+    <nav class="main-nav" aria-label="主要导航">
+      <a href="#mental-model">任务地图</a>
+      <a href="#glossary">术语</a>
+      <a href="#anndata">数据</a>
+      <a href="#metrics">指标</a>
+      <a href="#roadmap">路线图</a>
+    </nav>
+    <div class="header-progress" aria-label="学习进度">
+      <span id="header-progress-label">0%</span>
+      <span class="mini-progress"><i id="header-progress-bar"></i></span>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="grid-overlay" aria-hidden="true"></div>
+      <div class="hero-content shell">
+        <div class="hero-copy reveal">
+          <p class="eyebrow"><span></span>Virtual Cell Challenge 2026</p>
+          <h1>从基因组模型，<br>走向<strong>虚拟细胞</strong></h1>
+          <p class="hero-lead">一份为基因组语言模型研究者设计的单细胞扰动建模指南。先打通数据与提交，再逐层掌握统计、评估和模型。</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#roadmap">开始第一阶段</a>
+            <a class="button ghost" href="#glossary">打开术语地图</a>
+            <a class="button ghost" href="control-data-audit/">Controls 数据审计实操 →</a>
+          </div>
+        </div>
+
+        <aside class="hero-panel reveal" aria-label="2026 验证集概况">
+          <p class="mono-label">VALIDATION PANEL</p>
+          <div class="stat-grid">
+            <article><strong>3</strong><span>匿名 contexts</span><small>A · B · C</small></article>
+            <article><strong>300</strong><span>CRISPRi targets</span><small>每个 context 相同</small></article>
+            <article><strong>400</strong><span>cells / target</span><small>必须精确匹配</small></article>
+            <article><strong>18,533</strong><span>genes / cell</span><small>固定 gene space</small></article>
+          </div>
+          <div class="submission-size">
+            <span>完整提交规模</span><small>sparse raw-count matrix</small>
+            <strong>360,000 × 18,533</strong>
+          </div>
+        </aside>
+      </div>
+      <div class="hero-foot shell">
+        <span>当前阶段：Validation</span>
+        <span>Final contexts：D · E · F</span>
+        <span>截止：2026 · 11 · 05</span>
+      </div>
+    </section>
+
+    <section class="section shell" id="mental-model">
+      <header class="section-heading reveal">
+        <p class="section-index">01 / MENTAL MODEL</p>
+        <h2>先改变问题的<strong>坐标系</strong></h2>
+        <p>你不需要重新学习 Transformer。需要改变的是输入、监督信号和泛化目标。</p>
+      </header>
+
+      <div class="migration-map reveal">
+        <article class="domain-card">
+          <p class="card-kicker">你熟悉的范式</p>
+          <h3>Genome model</h3>
+          <div class="formula">DNA sequence <span>→</span> representation</div>
+          <ul><li>碱基或 k-mer 是 token</li><li>序列相对稳定</li><li>输出通常是标签、分数或序列</li></ul>
+        </article>
+        <div class="migration-arrow"><span>迁移</span><i></i></div>
+        <article class="domain-card dark-card">
+          <p class="card-kicker">比赛中的范式</p>
+          <h3>Virtual cell</h3>
+          <div class="formula">control distribution + target <span>→</span> response distribution</div>
+          <ul><li>一个 cell 是 18,533 维状态</li><li>表达是随机计数与动态状态</li><li>输出是 400 个扰动细胞的分布</li></ul>
+        </article>
+      </div>
+
+      <div class="core-equation reveal">
+        <p class="mono-label">COMPETITION OBJECTIVE</p>
+        <div class="equation"><em>P</em>(X<sub>pert</sub>) = f ( <span>P(X<sub>control</sub> | context)</span>, <b>target gene</b> )</div>
+        <p>没有天然的 control-cell ↔ perturbed-cell 一一配对；预测目标是条件分布。</p>
+      </div>
+
+      <div class="generalization-block reveal">
+        <div>
+          <p class="card-kicker">GENERALIZATION MATRIX</p>
+          <h3>离线验证必须覆盖右下角</h3>
+          <p>随机按细胞切分只能测到最简单的左上角，而且很容易发生实验泄漏。</p>
+        </div>
+        <div class="matrix" role="table" aria-label="泛化设置矩阵">
+          <div></div><div class="matrix-head">Perturbation seen</div><div class="matrix-head">Perturbation unseen</div>
+          <div class="matrix-side">Context seen</div><div class="matrix-cell"><strong>拟合检查</strong><span>最简单</span></div><div class="matrix-cell mid"><strong>Perturbation generalization</strong><span>依赖 gene prior</span></div>
+          <div class="matrix-side">Context unseen</div><div class="matrix-cell mid"><strong>Context generalization</strong><span>STATE 核心场景</span></div><div class="matrix-cell target"><strong>VCC 2026</strong><span>双重 zero-shot</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section tinted" id="glossary">
+      <div class="shell">
+        <header class="section-heading reveal">
+          <p class="section-index">02 / GLOSSARY</p>
+          <h2>需要掌握的<strong>术语地图</strong></h2>
+          <p>目标不是背定义，而是能判断每个概念如何影响训练、验证或提交。</p>
+        </header>
+
+        <div class="glossary-toolbar reveal">
+          <label class="search-box"><span>⌕</span><input id="term-search" type="search" placeholder="搜索：CRISPRi、raw counts、batch…"></label>
+          <div class="filters" role="group" aria-label="术语分类">
+            <button class="filter active" data-filter="all">全部</button>
+            <button class="filter" data-filter="biology">生物与实验</button>
+            <button class="filter" data-filter="statistics">统计与表达</button>
+            <button class="filter" data-filter="ml">机器学习</button>
+            <button class="filter" data-filter="engineering">数据工程</button>
+          </div>
+        </div>
+
+        <div class="term-grid" id="term-grid">
+          <article class="term-card" data-category="biology" data-search="single cell rna 单细胞"><span>生物与实验</span><h3>scRNA-seq</h3><p>分别测量大量单细胞的转录组，得到 cells × genes 计数矩阵，而不是 bulk 平均。</p></article>
+          <article class="term-card" data-category="biology" data-search="crispr screen 扰动"><span>生物与实验</span><h3>Perturb-seq</h3><p>把 pooled CRISPR screen 与单细胞 RNA 测序结合，读取大量 perturbations 的全转录组表型。</p></article>
+          <article class="term-card" data-category="biology" data-search="knockdown dcas9 repression 敲低"><span>生物与实验</span><h3>CRISPRi</h3><p>通过 dCas9 抑制目标基因转录。通常是程度不一的 knockdown，不等于切断 DNA 的 knockout。</p></article>
+          <article class="term-card" data-category="biology" data-search="sgrna construct 引导"><span>生物与实验</span><h3>Guide / construct</h3><p>把 CRISPRi 引导到 target 的序列；同一 target 可有多个 guide，效率可能不同。</p></article>
+          <article class="term-card" data-category="biology" data-search="non-targeting control 对照"><span>生物与实验</span><h3>NTC</h3><p>Non-targeting control，不靶向任何基因，用于定义新 context 的未扰动状态。</p></article>
+          <article class="term-card" data-category="biology" data-search="basal control 基础状态"><span>生物与实验</span><h3>Basal state</h3><p>扰动前的细胞状态分布。2026 的 context 信息由 18,400 个 control cells 表达出来。</p></article>
+          <article class="term-card" data-category="biology" data-search="cell line cell type 细胞系"><span>生物与实验</span><h3>Context</h3><p>细胞系及其遗传、表观遗传和培养状态。A/B/C 是匿名 cell lines，不是普通 batch 标签。</p></article>
+          <article class="term-card" data-category="biology" data-search="gene regulatory network pathway 调控网络"><span>生物与实验</span><h3>GRN / pathway</h3><p>基因调控网络与功能通路，为从已知 target 外推到未见 target 提供结构先验。</p></article>
+
+          <article class="term-card" data-category="statistics" data-search="umi integer 原始计数"><span>统计与表达</span><h3>Raw counts</h3><p>原始非负整数分子计数。模型可在 normalized space 工作，但最终必须提交 raw counts。</p></article>
+          <article class="term-card" data-category="statistics" data-search="sequencing depth 测序深度"><span>统计与表达</span><h3>Library size</h3><p>一个细胞所有基因 counts 的总和，同时受到真实 RNA 含量和测序深度影响。</p></article>
+          <article class="term-card" data-category="statistics" data-search="normalization 标准化"><span>统计与表达</span><h3>CP10K + log1p</h3><p>按单细胞总 counts 缩放到一万再取 log1p，常用于模型输入，但不能直接提交。</p></article>
+          <article class="term-card" data-category="statistics" data-search="zero dropout 稀疏 零"><span>统计与表达</span><h3>Sparsity</h3><p>零可能是真未表达，也可能是有限采样的结果，不应全部解释为 biological dropout。</p></article>
+          <article class="term-card" data-category="statistics" data-search="negative binomial poisson multinomial 负二项"><span>统计与表达</span><h3>Count distribution</h3><p>Poisson、negative binomial、multinomial 决定如何从连续预测生成真实感单细胞。</p></article>
+          <article class="term-card" data-category="statistics" data-search="aggregate mean 聚合 平均"><span>统计与表达</span><h3>Pseudobulk</h3><p>聚合同组细胞形成稳定表达概况，适合估计平均 perturbation delta 和建立基线。</p></article>
+          <article class="term-card" data-category="statistics" data-search="differential expression log fold change wilcoxon 差异表达"><span>统计与表达</span><h3>DE / logFC</h3><p>比较 perturbation 与 control 的变化，既要看显著性，也要看方向和 effect size。</p></article>
+          <article class="term-card" data-category="statistics" data-search="domain shift 批次效应"><span>统计与表达</span><h3>Batch effect</h3><p>实验、平台和培养流程造成的系统差异；校正过度也可能抹掉真实响应。</p></article>
+
+          <article class="term-card" data-category="ml" data-search="residual 残差 变化量"><span>机器学习</span><h3>Delta prediction</h3><p>预测相对 control 的变化量，再加回 basal state，通常比从零生成完整表达谱稳定。</p></article>
+          <article class="term-card" data-category="ml" data-search="unseen cell line 泛化"><span>机器学习</span><h3>Context generalization</h3><p>把已知 perturbation effect 迁移到没有扰动观测的新细胞系。</p></article>
+          <article class="term-card" data-category="ml" data-search="unseen target 零样本"><span>机器学习</span><h3>Perturbation generalization</h3><p>预测训练中未见过 response 的 target，通常依赖 ESM2、GO、GRN 等 gene priors。</p></article>
+          <article class="term-card" data-category="ml" data-search="set distribution 集合 分布"><span>机器学习</span><h3>Set-to-set</h3><p>将一组 control cells 映射为一组 perturbed cells，不假设细胞间一一配对。</p></article>
+          <article class="term-card" data-category="ml" data-search="energy distance optimal transport ot 能量距离"><span>机器学习</span><h3>Distributional loss</h3><p>Energy distance 或 optimal transport 衡量两个细胞集合的分布差异。</p></article>
+          <article class="term-card" data-category="ml" data-search="esm2 go protein prior 基因嵌入"><span>机器学习</span><h3>Gene embedding</h3><p>用蛋白序列、GO 或网络位置表达 target，可直接迁移你的 genomic representation 经验。</p></article>
+          <article class="term-card" data-category="ml" data-search="split validation 数据泄漏"><span>机器学习</span><h3>Leakage</h3><p>同一 dataset、batch、context 或 perturbation 跨越训练与验证，会造成虚高结果。</p></article>
+
+          <article class="term-card" data-category="engineering" data-search="adata annotated matrix 数据格式"><span>数据工程</span><h3>AnnData</h3><p>单细胞生态的核心容器：X 存表达，obs 存细胞信息，var 存基因信息。</p></article>
+          <article class="term-card" data-category="engineering" data-search="hdf5 backed 磁盘"><span>数据工程</span><h3>H5AD / backed</h3><p>AnnData 的 HDF5 文件格式；backed="r" 可在不加载完整矩阵时检查大文件。</p></article>
+          <article class="term-card" data-category="engineering" data-search="sparse matrix 稀疏矩阵 nnz"><span>数据工程</span><h3>CSR / NNZ</h3><p>按行压缩的稀疏矩阵与实际存储条目数；完整输出绝不能无脑 densify。</p></article>
+          <article class="term-card" data-category="engineering" data-search="var names order symbol 基因对齐"><span>数据工程</span><h3>Gene alignment</h3><p>训练集、control 与输出必须按 gene symbol 显式对齐；相同维度不代表相同顺序。</p></article>
+        </div>
+        <p id="term-empty" class="empty-state" hidden>没有匹配的术语，换一个关键词试试。</p>
+      </div>
+    </section>
+
+    <section class="section shell" id="anndata">
+      <header class="section-heading reveal">
+        <p class="section-index">03 / DATA LITERACY</p>
+        <h2>读懂一个<strong>AnnData</strong></h2>
+        <p>点击组件查看它在 VCC 中的含义。第一条硬规则：行是 cells，列是 genes。</p>
+      </header>
+
+      <div class="anndata-explorer reveal">
+        <div class="adata-tabs" role="tablist" aria-label="AnnData 组件">
+          <button class="adata-tab active" data-adata="x">X</button>
+          <button class="adata-tab" data-adata="obs">obs</button>
+          <button class="adata-tab" data-adata="var">var</button>
+          <button class="adata-tab" data-adata="layers">layers</button>
+          <button class="adata-tab" data-adata="obsm">obsm</button>
+          <button class="adata-tab" data-adata="uns">uns</button>
+        </div>
+        <div class="adata-visual">
+          <span class="axis cells">18,400 cells</span>
+          <div class="matrix-visual"><div></div><strong>adata.X</strong><small>CSR · raw integer counts</small></div>
+          <span class="axis genes">18,533 genes</span>
+        </div>
+        <article class="adata-detail" id="adata-detail">
+          <p class="card-kicker">EXPRESSION MATRIX</p>
+          <h3><code>adata.X</code></h3>
+          <p>形状为 [n_cells, n_genes]。2026 controls 的 X 是 sparse raw counts；提交也必须是非负整数 counts。</p>
+          <div class="code-line"><span>shape</span><code>(18_400, 18_533)</code></div>
+          <div class="code-line"><span>注意</span><code>不要直接 .toarray()</code></div>
+        </article>
+      </div>
+
+      <div class="data-contract reveal">
+        <article><span>INPUT</span><h3>每个 context 的 control</h3><pre><code>X      (18,400 × 18,533) CSR counts
+obs    target_gene = non-targeting
+       context = A / B / C
+       ntc_id
+var    official gene symbols</code></pre></article>
+        <i>→</i>
+        <article class="dark-card"><span>OUTPUT</span><h3>一个完整 submission</h3><pre><code>X      (360,000 × 18,533) CSR counts
+obs    target_gene = official 300
+       context = A / B / C
+rules  400 cells per context-target
+       no non-targeting cells</code></pre></article>
+      </div>
+    </section>
+
+    <section class="section metrics-section" id="metrics">
+      <div class="shell">
+        <header class="section-heading light reveal">
+          <p class="section-index">04 / SCORE SURFACE</p>
+          <h2>六项指标，<strong>同等权重</strong></h2>
+          <p>0 是 context-mean baseline，1 是实验 split-half replicate；分数不是百分比。</p>
+        </header>
+        <div class="metric-grid reveal">
+          <article style="--color:var(--lime)"><span>PDS</span><em>01</em><h3>Perturbation discrimination</h3><p>预测 profile 能否在 300 个 perturbations 中正确区分自己的 target。</p><small>perturbation-specific signal</small></article>
+          <article style="--color:var(--sky)"><span>MSE</span><em>02</em><h3>Expression accuracy</h3><p>全基因表达误差，并校正一部分不可避免的抽样噪声。</p><small>global expression calibration</small></article>
+          <article style="--color:var(--orange)"><span>NMAE</span><em>03</em><h3>DE log-FC accuracy</h3><p>扰动相对 control 的 fold-change 幅度是否接近真实实验。</p><small>effect-size calibration</small></article>
+          <article style="--color:var(--mint)"><span>FID</span><em>04</em><h3>Direction fidelity</h3><p>预测上调的基因是否真的上调，预测下调的是否真的下调。</p><small>signed biological effect</small></article>
+          <article style="--color:var(--lavender)"><span>REACH</span><em>05</em><h3>Direction reach</h3><p>从最强响应向后看，正确方向能够维持到多深的排名。</p><small>ranking depth</small></article>
+          <article style="--color:var(--pink)"><span>JAC</span><em>06</em><h3>Significance Jaccard</h3><p>预测和真实实验判为显著响应的 gene sets 有多少重合。</p><small>DE set recovery</small></article>
+        </div>
+        <div class="balance reveal">
+          <div><strong>过度贴近 control</strong><span>MSE 可能尚可</span><b>PDS / DE 失败</b></div>
+          <i></i>
+          <div><strong>制造过强 delta</strong><span>PDS 可能提高</span><b>MSE / NMAE 失败</b></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section shell" id="roadmap">
+      <header class="section-heading reveal">
+        <p class="section-index">05 / EXECUTION ROADMAP</p>
+        <h2>学习与比赛<strong>同步推进</strong></h2>
+        <p>勾选状态自动保存在当前浏览器。先建立能提交的 baseline，再增加模型复杂度。</p>
+      </header>
+      <div class="roadmap-progress reveal">
+        <div><span>总体完成度</span><strong id="roadmap-percent">0%</strong></div>
+        <div class="progress-track"><i id="roadmap-progress-bar"></i></div>
+        <button id="reset-progress">重置进度</button>
+      </div>
+
+      <div class="timeline">
+        <article class="phase reveal"><div class="phase-marker">00</div><div class="phase-body">
+          <div class="phase-meta"><span>9 月 4–7 日</span><em>工程优先</em></div><h3>打通第一份合法提交</h3><p>消除格式、规模、稀疏度和 CLI 的全部不确定性。</p>
+          <div class="tasks">
+            <label><input type="checkbox" data-task="p0a"><span>审计 A/B/C 的 shape、counts、library size 与 NNZ</span></label>
+            <label><input type="checkbox" data-task="p0b"><span>运行 vcc sample 熟悉完整链路</span></label>
+            <label><input type="checkbox" data-task="p0c"><span>构造 control-resampling baseline</span></label>
+            <label><input type="checkbox" data-task="p0d"><span>通过 vcc prep --dry-run 并完成首个提交</span></label>
+          </div><div class="deliverable"><span>交付物</span><strong>一条命令稳定生成合法 .vcc</strong></div>
+        </div></article>
+
+        <article class="phase reveal"><div class="phase-marker">01</div><div class="phase-body">
+          <div class="phase-meta"><span>9 月 8–14 日</span><em>数据基础</em></div><h3>掌握单细胞表达数据</h3><p>把 raw counts、normalization 和 technical variation 变成可检查的数据对象。</p>
+          <div class="tasks">
+            <label><input type="checkbox" data-task="p1a"><span>掌握 AnnData、CSR、backed 与 gene alignment</span></label>
+            <label><input type="checkbox" data-task="p1b"><span>理解 raw counts、CP10K、log1p 与 library size</span></label>
+            <label><input type="checkbox" data-task="p1c"><span>比较 A/B/C pseudobulk、PCA 与表达覆盖率</span></label>
+            <label><input type="checkbox" data-task="p1d"><span>分析 ntc_id 是否引入明显结构</span></label>
+          </div><div class="deliverable"><span>交付物</span><strong><a href="control-data-audit/">Controls 数据审计：阅读教程 →</a></strong></div>
+        </div></article>
+
+        <article class="phase reveal"><div class="phase-marker">02</div><div class="phase-body">
+          <div class="phase-meta"><span>9 月 15–21 日</span><em>实验与统计</em></div><h3>理解 Perturb-seq 与评分</h3><p>使用 2025 H1 或 Replogle 真值，复现从 control 到 DE metrics 的过程。</p>
+          <div class="tasks">
+            <label><input type="checkbox" data-task="p2a"><span>计算 perturbation mean delta 与 logFC</span></label>
+            <label><input type="checkbox" data-task="p2b"><span>运行 Wilcoxon DE 并检查 top genes</span></label>
+            <label><input type="checkbox" data-task="p2c"><span>理解六项 metrics 的相互制约</span></label>
+            <label><input type="checkbox" data-task="p2d"><span>用 cell-eval2 对公开 holdout 做评估</span></label>
+          </div><div class="deliverable"><span>交付物</span><strong>02_perturbation_statistics.ipynb</strong></div>
+        </div></article>
+
+        <article class="phase reveal"><div class="phase-marker">03</div><div class="phase-body">
+          <div class="phase-meta"><span>9 月 22–10 月 5 日</span><em>可靠 benchmark</em></div><h3>建立 baseline ladder</h3><p>先知道简单方法能做到哪里，并建立正确的二维 holdout。</p>
+          <div class="tasks">
+            <label><input type="checkbox" data-task="p3a"><span>实现 control、context-mean 与 count-sampling baselines</span></label>
+            <label><input type="checkbox" data-task="p3b"><span>实现 global/additive perturbation delta transfer</span></label>
+            <label><input type="checkbox" data-task="p3c"><span>建立 context × perturbation 双重 holdout</span></label>
+            <label><input type="checkbox" data-task="p3d"><span>统一六项指标、运行成本与实验记录</span></label>
+          </div><div class="deliverable"><span>交付物</span><strong>可复现的 offline leaderboard</strong></div>
+        </div></article>
+
+        <article class="phase reveal"><div class="phase-marker">04</div><div class="phase-body">
+          <div class="phase-meta"><span>10 月 6–18 日</span><em>正式模型</em></div><h3>推进三条建模路线</h3><p>STATE、低秩 delta transfer 和 gene-prior 模型共享同一评估接口。</p>
+          <div class="tasks">
+            <label><input type="checkbox" data-task="p4a"><span>适配 STATE 到 18,533 gene space</span></label>
+            <label><input type="checkbox" data-task="p4b"><span>训练 low-rank/context-conditioned delta 模型</span></label>
+            <label><input type="checkbox" data-task="p4c"><span>比较 ESM2、GO、GRN 等 target priors</span></label>
+            <label><input type="checkbox" data-task="p4d"><span>建立连续表达到 raw counts 的 decoder/sampler</span></label>
+          </div><div class="deliverable"><span>交付物</span><strong>2–3 个互补候选模型</strong></div>
+        </div></article>
+
+        <article class="phase reveal"><div class="phase-marker">05</div><div class="phase-body">
+          <div class="phase-meta"><span>10 月 19–21 日</span><em>冻结方案</em></div><h3>在 final release 前锁定流程</h3><p>预先决定模型、ensemble、sampling 和选择规则。</p>
+          <div class="tasks">
+            <label><input type="checkbox" data-task="p5a"><span>冻结 preprocessing、gene mapping 与 checkpoints</span></label>
+            <label><input type="checkbox" data-task="p5b"><span>冻结 sampling seeds、decoder 与 ensemble weights</span></label>
+            <label><input type="checkbox" data-task="p5c"><span>对候选提交做全量 schema 与 stress test</span></label>
+          </div><div class="deliverable"><span>交付物</span><strong>final-ready release bundle</strong></div>
+        </div></article>
+
+        <article class="phase final reveal"><div class="phase-marker">FIN</div><div class="phase-body">
+          <div class="phase-meta"><span>10 月 22–11 月 5 日</span><em>Final · D/E/F</em></div><h3>执行，而不是重新发明</h3><p>审计新 controls，运行冻结模型，只提交少量高置信度版本。</p>
+          <div class="tasks">
+            <label><input type="checkbox" data-task="p6a"><span>完成 D/E/F domain-shift audit</span></label>
+            <label><input type="checkbox" data-task="p6b"><span>运行全部冻结候选与 ensemble</span></label>
+            <label><input type="checkbox" data-task="p6c"><span>逐 context-target 检查 counts、NNZ 与 library size</span></label>
+            <label><input type="checkbox" data-task="p6d"><span>完成 final prep、提交和复现归档</span></label>
+          </div><div class="deliverable"><span>交付物</span><strong>最终可复现 submission</strong></div>
+        </div></article>
+      </div>
+    </section>
+
+    <section class="section tinted" id="strategy">
+      <div class="shell">
+        <header class="section-heading reveal">
+          <p class="section-index">06 / COMPETITION SYSTEM</p>
+          <h2>始终保持<strong>三条工作流</strong></h2>
+          <p>不要让格式工程、科学验证和模型研发耦合在一个巨型 notebook 中。</p>
+        </header>
+        <div class="track-grid reveal">
+          <article><span>TRACK 01</span><h3>提交工程</h3><p>任何时候都能稳定生成合法、稀疏、raw-count 的 .vcc。</p><small>schema · count sampling · sparse I/O</small></article>
+          <article class="dark-card"><span>TRACK 02</span><h3>离线科学评估</h3><p>判断改进是真泛化，还是 public leaderboard noise。</p><small>2D holdout · six metrics · leakage audit</small></article>
+          <article><span>TRACK 03</span><h3>模型研发</h3><p>让复杂模型始终与简单强基线在同一数据接口竞争。</p><small>STATE · delta transfer · priors</small></article>
+        </div>
+
+        <div class="baseline-ladder reveal">
+          <div><p class="card-kicker">BASELINE LADDER</p><h3>复杂度只有在赢过下一阶时才有价值</h3></div>
+          <ol>
+            <li><span>B0</span><div><strong>Control resampling</strong><small>验证 count 与提交管线</small></div></li>
+            <li><span>B1</span><div><strong>Context mean + sampling</strong><small>官方 0 分参照附近</small></div></li>
+            <li><span>B2</span><div><strong>Global perturbation delta</strong><small>忽略 context interaction</small></div></li>
+            <li><span>B3</span><div><strong>Low-rank delta transfer</strong><small>建立强统计 baseline</small></div></li>
+            <li><span>B4</span><div><strong>Gene-prior conditioned</strong><small>ESM2 · GO · GRN</small></div></li>
+            <li><span>B5</span><div><strong>STATE / ensemble</strong><small>完整分布与 context 建模</small></div></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="section shell" id="resources">
+      <header class="section-heading reveal">
+        <p class="section-index">07 / READING QUEUE</p>
+        <h2>只读当前阶段<strong>用得上的材料</strong></h2>
+        <p>按顺序阅读；每篇都带着一个明确问题，而不是从头背到尾。</p>
+      </header>
+      <div class="resources reveal">
+        <a href="https://vcc-cli-wiki.virtualcellchallenge.org/" target="_blank" rel="noreferrer"><span>01</span><div><strong>VCC CLI & submission guide</strong><small>先弄清楚什么文件能提交</small></div><em>官方规则 ↗</em></a>
+        <a href="https://anndata.readthedocs.io/en/stable/tutorials/notebooks/getting-started.html" target="_blank" rel="noreferrer"><span>02</span><div><strong>AnnData getting started</strong><small>理解 X / obs / var / layers / obsm</small></div><em>官方文档 ↗</em></a>
+        <a href="https://scanpy.readthedocs.io/en/latest/tutorials/basics/clustering.html" target="_blank" rel="noreferrer"><span>03</span><div><strong>Scanpy preprocessing</strong><small>重点看 counts、normalization、HVG 与 PCA</small></div><em>官方教程 ↗</em></a>
+        <a href="https://www.sciencedirect.com/science/article/pii/S0092867422005979" target="_blank" rel="noreferrer"><span>04</span><div><strong>Genome-scale Perturb-seq</strong><small>理解实验设计与 perturbation phenotype</small></div><em>Cell 2022 ↗</em></a>
+        <a href="https://www.biorxiv.org/content/10.1101/2025.06.26.661135v2.full" target="_blank" rel="noreferrer"><span>05</span><div><strong>STATE</strong><small>重点看 set-to-set 与 context generalization</small></div><em>bioRxiv ↗</em></a>
+        <a href="https://github.com/ArcInstitute/cell-eval2" target="_blank" rel="noreferrer"><span>06</span><div><strong>cell-eval2 · VCC 2026 metrics</strong><small>理解六项指标如何塑造模型行为</small></div><em>官方实现 ↗</em></a>
+        <a href="https://www.nature.com/articles/s41587-023-01905-6" target="_blank" rel="noreferrer"><span>07</span><div><strong>GEARS</strong><small>理解 gene graph 如何支持 unseen perturbation</small></div><em>Nat. Biotech. ↗</em></a>
+      </div>
+    </section>
+
+    <section class="next-step">
+      <div class="shell next-inner reveal">
+        <div><p class="section-index">NEXT MILESTONE</p><h2>先完成数据导览，<br>再启动 STATE。</h2></div>
+        <article><span>建议的第一个 notebook</span><strong><a href="control-data-audit/">Controls 数据审计：阅读教程 →</a></strong>
+          <ul><li>AnnData 与 sparse counts</li><li>A/B/C expression shift</li><li>library size 与 NTC variation</li><li>第一份合法 baseline submission</li></ul>
+          <a class="button primary" href="#roadmap">查看 Phase 00</a>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="shell"><div><strong>VCC 2026 Learning Hub</strong><span>从基因组模型迁移到单细胞扰动建模</span></div><a href="../">返回个人主页</a><a href="#top">返回顶部 ↑</a></div></footer>
+  <script src="app.js"></script>
+</body>
+</html>
