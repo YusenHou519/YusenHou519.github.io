@@ -45,7 +45,8 @@ Contact: [yhou925@connect.hkust-gz.edu.cn](mailto:yhou925@connect.hkust-gz.edu.c
 
 <p class="pub-note">* denotes equal contribution.</p>
 
-## Workshop & Preprint
+<details class="publication-group" open markdown="1">
+<summary><h2 id="workshop--preprint">Workshop &amp; Preprint</h2></summary>
 
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">iscbAI 2026 Oral</div><img src='images/glmap.png' alt="GLMap" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
@@ -59,14 +60,14 @@ Contact: [yhou925@connect.hkust-gz.edu.cn](mailto:yhou925@connect.hkust-gz.edu.c
 <a href="paper/GLMap-iscbAI-2026.pdf">Paper</a> · <a href="https://ai4nucleome.github.io/GLMap/">Web Page</a> · <a href="https://github.com/ai4nucleome/GLMap">Code</a>
 </div></div>
 
-<div class='paper-box'><div class='paper-box-image'><div><div class="badge">bioRxiv</div><img src='images/contextTAD.png' alt="ContextTAD" width="100%"></div></div>
+<div class='paper-box'><div class='paper-box-image'><div><div class="badge">In Revision</div><img src='images/contextTAD.png' alt="ContextTAD" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
 
 [ContextTAD: Context-aware boundary learning for TAD calling from Hi-C contact maps](https://www.biorxiv.org/content/10.64898/2026.05.08.723772v1)
 
 Weicai Long\*, <strong><u>Yusen Hou</u></strong>\*, Yanlin Zhang
 
-<em>bioRxiv, 2026.</em>
+In Revision at <em>Nucleic Acids Research</em> (IF=15.0)
 
 <a href="https://www.biorxiv.org/content/10.64898/2026.05.08.723772v1">Paper</a> · <a href="paper/contextTAD.pdf">PDF</a> · <a href="https://github.com/ai4nucleome/ContextTAD">Code</a>
 </div></div>
@@ -83,19 +84,22 @@ Houcheng Su, Weicai Long, Junning Feng, <strong><u>Yusen Hou</u></strong>, Yanli
 <a href="https://www.biorxiv.org/content/10.64898/2026.03.02.709209v2">Paper</a> · <a href="paper/PopGenAgent.pdf">PDF</a> · <a href="https://github.com/ai4nucleome/POPGENAGENT">Code</a>
 </div></div>
 
-<div class='paper-box'><div class='paper-box-image'><div><div class="badge">bioRxiv</div><img src='images/polaris-model.png' alt="Polaris" width="100%"></div></div>
+<div class='paper-box'><div class='paper-box-image'><div><div class="badge">In Revision</div><img src='images/polaris-model.png' alt="Polaris" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
 
 [Polaris: A Universal Framework for Chromatin Loop Annotation from Bulk and Single-cell Contact Maps](https://www.biorxiv.org/content/10.1101/2024.12.24.630215v1)
 
 <strong><u>Yusen Hou</u></strong>, Audrey Baguette, Mathieu Blanchette, Yanlin Zhang
 
-<em>bioRxiv, 2024.</em>
+In Revision at <em>Nucleic Acids Research</em> (IF=15.0)
 
 <a href="https://www.biorxiv.org/content/10.1101/2024.12.24.630215v1">Paper</a> · <a href="paper/Polaris.pdf">PDF</a> · <a href="https://ai4nucleome.github.io/Polaris/">Web Page</a> · <a href="https://github.com/ai4nucleome/Polaris">Code</a>
 </div></div>
 
-## Conference
+</details>
+
+<details class="publication-group" open markdown="1">
+<summary><h2 id="conference">Conference</h2></summary>
 
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">EMNLP 2026 Main</div><img src='images/able.png' alt="ABLE" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
@@ -133,7 +137,10 @@ Weicai Long\*, <strong><u>Yusen Hou</u></strong>\*, Junning Feng, Houcheng Su, S
 <a href="https://arxiv.org/abs/2604.05775">Paper</a> · <a href="paper/PhageBench.pdf">PDF</a> · <a href="https://yusenhou519.github.io/Phage-Bench/">Web Page</a> · <a href="https://github.com/YusenHou519/Phage-Bench">Code</a>
 </div></div>
 
-## Journal
+</details>
+
+<details class="publication-group" open markdown="1">
+<summary><h2 id="journal">Journal</h2></summary>
 
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">Patterns 2026 Cover</div><img src='images/biomaster.png' alt="BioMaster" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
@@ -159,12 +166,14 @@ Xu Yang, Qingfa Xiao, Yucheng Xu, Jixin Yang, <strong><u>Yusen Hou</u></strong>,
 <a href="https://europepmc.org/article/med/42007520">Paper</a> · <a href="paper/NyxBind.pdf">PDF</a> · <a href="https://github.com/ai4nucleome/NyxBind">Code</a>
 </div></div>
 
+</details>
+
 <span class='anchor' id='presentations'></span>
 
 # Presentations
 
 - **Profiling genomic language models as individuals in a population** · Yusen Hou · <a href="https://www.iscb-cn.org.cn/web/65/list.html">Oral Presentation</a> · iscbAI 2026 (2026)
-- **LoopHunter: Enhancing Chromatin Loop Annotation by Focusing on Larger Regions in Hi-C Data** · Yusen Hou, Yanlin Zhang · ISMB Poster (2025)
+- **Polaris: A Universal Framework for Chromatin Loop Annotation from Bulk and Single-cell Contact Maps** · Yusen Hou, Yanlin Zhang · ISMB Poster (2025)
 - **Polaris: a universal tool for chromatin loop annotation in bulk and single-cell Hi-C data** · Yusen Hou · <a href="https://ngic2025.aconf.cn/presentation/38.html">Oral Presentation</a> · NGIC 2025 (2025)
 - **LoopHunter: Enhancing Chromatin Loop Annotation by Focusing on Larger Regions in Hi-C Data** · Yusen Hou, Yanlin Zhang · ISMB Poster (2024)
 
@@ -178,7 +187,7 @@ Xu Yang, Qingfa Xiao, Yucheng Xu, Jixin Yang, <strong><u>Yusen Hou</u></strong>,
 
 <span class='anchor' id='educations'></span>
 
-# Educations
+# Education
 
 - Ph.D. Student, Data Science and Analytics, [HKUST(GZ)](https://hkust-gz.edu.cn/) (2025 — Present)
 - MPhil, Data Science and Analytics, [HKUST(GZ)](https://hkust-gz.edu.cn/) (2023 — 2025)

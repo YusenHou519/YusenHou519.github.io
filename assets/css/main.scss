@@ -40,6 +40,26 @@
 @import "vendor/magnific-popup/magnific-popup";
 @import "print";
 
+.publication-group {
+    margin: 1em 0;
+
+    > summary {
+        display: list-item;
+        cursor: pointer;
+        padding: 0.5em 0;
+
+        h2 {
+            display: inline;
+            margin: 0;
+        }
+
+        &:focus-visible {
+            outline: 2px solid currentColor;
+            outline-offset: 4px;
+        }
+    }
+}
+
 .paper-box {
     display: flex;
     justify-content: left;
