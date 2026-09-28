@@ -29,7 +29,7 @@ Contact: [yhou925@connect.hkust-gz.edu.cn](mailto:yhou925@connect.hkust-gz.edu.c
 
 # News
 
-- *2026.08* 🎉🎉🎉 Our work [ABLE](paper/ABLE-EMNLP-2026.pdf) was accepted to the **Main conference of [EMNLP 2026](https://2026.emnlp.org/).**
+- *2026.08* 🎉🎉🎉 Our work [ABLE](paper/ABLE-EMNLP-2026.pdf) was accepted to the main conference of **[EMNLP 2026](https://2026.emnlp.org/)** as an **Oral** presentation.
 - *2026.08* Our work [BioMaster](https://www.cell.com/patterns/fulltext/S2666-3899(26)00120-0) was selected as the **🔥 Cover Article 🔥** of [**Patterns**](https://www.cell.com/patterns), Vol. 7, Issue 8.
 - *2026.07* Our work [GLMap](https://ai4nucleome.github.io/GLMap/) was accepted for an **oral presentation** at [**iscbAI 2026**](https://www.iscb-cn.org.cn/web/65/list.html).
 - *2026.06* Our work [BioMaster](https://ai4nucleome.github.io/BioMaster/) was accepted by [**Patterns**](https://doi.org/10.1016/j.patter.2026.101611).
@@ -101,14 +101,14 @@ In Revision at <strong><em>Nucleic Acids Research</em> (IF=15.0)</strong>
 <details class="publication-group" open markdown="1">
 <summary><h2 id="conference">Conference</h2></summary>
 
-<div class='paper-box'><div class='paper-box-image'><div><div class="badge"><strong>EMNLP</strong> 2026 Main</div><img src='images/able.png' alt="ABLE" width="100%"></div></div>
+<div class='paper-box'><div class='paper-box-image'><div><div class="badge"><strong>EMNLP</strong> 2026 Oral</div><img src='images/able.png' alt="ABLE" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
 
 [ABLE: Representing and Mapping LLMs via Attribution-Based Large-model Embedding](https://arxiv.org/abs/2606.07524)
 
 Zirui Wang, <strong><u>Yusen Hou</u></strong>, Shaofeng Liang, Bowen Tian, Yanlin Zhang, Wenshuo Chen, Yutao Yue
 
-<em>Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing (<strong>EMNLP Main</strong>), 2026.</em>
+<em>Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing (<strong>EMNLP Main, Oral</strong>), 2026.</em>
 
 <a href="https://arxiv.org/abs/2606.07524">Paper</a> · <a href="paper/ABLE-EMNLP-2026.pdf">PDF</a> · <a href="https://ziiroo1126.github.io/ABLE/">Web Page</a> · <a href="https://github.com/ziiroo1126/ABLE">Code</a> · <a href="https://2026.emnlp.org/">Conference</a>
 </div></div>
