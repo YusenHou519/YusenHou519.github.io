@@ -43,7 +43,7 @@ Contact: [yhou925@connect.hkust-gz.edu.cn](mailto:yhou925@connect.hkust-gz.edu.c
 
 # Publications
 
-<p class="pub-note">* denotes equal contribution.</p>
+<p class="pub-note">* denotes equal contribution; <sup>+</sup> denotes Project Leader.</p>
 
 <details class="publication-group" open markdown="1">
 <summary><h2 id="workshop--preprint">Workshop &amp; Preprint</h2></summary>
@@ -106,7 +106,7 @@ In Revision at <strong><em>Nucleic Acids Research</em> (IF=15.0)</strong>
 
 [ABLE: Representing and Mapping LLMs via Attribution-Based Large-model Embedding](https://arxiv.org/abs/2606.07524)
 
-Zirui Wang, <strong><u>Yusen Hou</u></strong>, Shaofeng Liang, Bowen Tian, Yanlin Zhang, Wenshuo Chen, Yutao Yue
+Zirui Wang, <strong><u>Yusen Hou</u></strong><sup>+</sup>, Shaofeng Liang, Bowen Tian, Yanlin Zhang, Wenshuo Chen, Yutao Yue
 
 <em>Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing (<strong>EMNLP Main, Oral</strong>), 2026.</em>
 
